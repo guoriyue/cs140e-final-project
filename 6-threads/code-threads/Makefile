@@ -29,7 +29,7 @@ STAFF_OBJS += staff-kmalloc.o
 # checkoff skips 1 since behavior changes
 
 # # the different tests: start with 1, then 2, then..
-# PROGS = $(wildcard ./7-test*.c)
+PROGS = $(wildcard ./8-test*.c)
 # PROGS = $(wildcard ./6-test*.c)
 # PROGS = $(wildcard ./5-test*.c)
 # # ...
@@ -37,7 +37,7 @@ STAFF_OBJS += staff-kmalloc.o
 # PROGS = $(wildcard ./1-test*.c)
 
 # all the tests.  
-PROGS = $(wildcard ./[234567]-test*.c)
+# PROGS = $(wildcard ./[234567]-test*.c)
 
 # PROGS = $(wildcard ./1-test*.c)
 # PROGS = 1-test-run-one.c
