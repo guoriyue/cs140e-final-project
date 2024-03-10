@@ -282,7 +282,7 @@ void rpi_yield(void) {
  * so that context switching works correctly.   your code
  * should work even if the runq is empty.
  */
-void rpi_thread_start(int priority) {
+void rpi_thread_start(int preemptive_t) {
     redzone_init();
     th_trace("starting threads!\n");
 
@@ -305,6 +305,80 @@ end:
     // if not more threads should print:
     th_trace("done with all threads, returning\n");
 }
+
+
+// client has to define this.
+void interrupt_preemptive_threads(unsigned pc, unsigned sp) {
+    // need sp because we need to do context switch.
+    dev_barrier();
+    unsigned pending = GET32(IRQ_basic_pending);
+
+    // if this isn't true, could be a GPU interrupt (as discussed in Broadcom):
+    // just return.  [confusing, since we didn't enable!]
+    if((pending & RPI_BASIC_ARM_TIMER_IRQ) == 0)
+        return;
+
+    // Checkoff: add a check to make sure we have a timer interrupt
+    // use p 113,114 of broadcom.
+
+    /* 
+     * Clear the ARM Timer interrupt - it's the only interrupt we have
+     * enabled, so we don't have to work out which interrupt source
+     * caused us to interrupt 
+     *
+     * Q: what happens, exactly, if we delete?
+     * Infinite interrupts and loop.
+     */
+    PUT32(arm_timer_IRQClear, 1);
+
+    /*
+     * We do not know what the client code was doing: if it was touching a 
+     * different device, then the broadcom doc states we need to have a
+     * memory barrier.   NOTE: we have largely been living in sin and completely
+     * ignoring this requirement for UART.   (And also the GPIO overall.)  
+     * This is probably not a good idea and we should be more careful.
+     */
+    dev_barrier();    
+    printk("IN TIMER INTERRUPT lr is %x %d\n", ((uint32_t *)sp)[8], ((uint32_t *)sp)[8]);
+    printk("IN TIMER INTERRUPT pc is %x %d\n", pc, pc);
+
+    Q_append(&runq, cur_thread);
+    // cur_thread->saved_sp = (uint32_t *)sp;
+    // cur_thread = scheduler_thread;
+    // must be incorrect
+    rpi_cswitch(scheduler_thread->saved_sp, cur_thread->saved_sp);
+}
+
+void pre_thread_start(int preemptive_t) {
+    redzone_init();
+    th_trace("starting threads!\n");
+
+    // define this in assembly
+    extern uint32_t interrupt_vector_pre_threads[];
+    int_vec_init((void *)interrupt_vector_pre_threads);
+
+    timer_interrupt_init(0x100);
+    register_timer_handler(interrupt_preemptive_threads);
+
+    th_trace("starting threads!\n");
+    
+    if(Q_empty(&runq))
+        goto end;
+
+    // setup scheduler thread block.
+    if(!scheduler_thread) {
+        scheduler_thread = th_alloc();
+        cur_thread = scheduler_thread;
+    }
+
+    // should do a lot of scheduling here?
+
+end:
+    redzone_check(0);
+    // if not more threads should print:
+    th_trace("done with all threads, returning\n");
+}
+
 
 // helper routine: can call from assembly with r0=sp and it
 // will print the stack out.  it then exits.

@@ -87,7 +87,7 @@ _Static_assert(offsetof(rpi_thread_t, saved_sp) == 0,
 
 // starts the thread system: only returns when there are
 // no more runnable threads. 
-void rpi_thread_start(void);
+void rpi_thread_start(int preemptive_t);
 
 // get the pointer to the current thread.  
 rpi_thread_t *rpi_cur_thread(void);
