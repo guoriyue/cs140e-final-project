@@ -141,7 +141,7 @@ static int equiv_syscall_handler(regs_t *r) {
     equiv_schedule();
 }
 
-static int equiv_timer_int_handler(regs_t *r) {
+static int equiv_timer_int_handler(void) {
     eq_th_t *th = eq_pop(&equiv_runq);
 
     if (!th) {

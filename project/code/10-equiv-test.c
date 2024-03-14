@@ -16,11 +16,9 @@ void equiv_puts(char *msg) {
 }
 
 void hello(void *msg) {
-    sleep(10);
     equiv_puts("hello from 1\n");
 }
 void msg(void *msg) {
-    sleep(10);
     equiv_puts(msg);
 }
 

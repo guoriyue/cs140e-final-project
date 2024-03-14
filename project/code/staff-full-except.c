@@ -39,7 +39,8 @@ static inline void fixup_regs(regs_t *r, uint32_t spsr) {
 }
 
 static full_except_t prefetch_handler, data_abort_handler;
-static full_excepti_t syscall_handler, timer_int_handler;
+static full_excepti_t syscall_handler;
+static full_exceptn_t timer_int_handler;
 
 // forward the prefetch abort exception to client supplied handler.
 //
@@ -118,8 +119,8 @@ full_excepti_t full_except_set_syscall(full_excepti_t h) {
     return o;
 }
 
-full_excepti_t full_except_timer_int(full_excepti_t h) {
-    full_excepti_t o = timer_int_handler;
+full_exceptn_t full_except_set_timer_int(full_exceptn_t h) {
+    full_exceptn_t o = timer_int_handler;
     timer_int_handler = h;
     return o;
 }
