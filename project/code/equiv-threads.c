@@ -141,6 +141,24 @@ static int equiv_syscall_handler(regs_t *r) {
     equiv_schedule();
 }
 
+static int equiv_timer_int_handler(regs_t *r) {
+    eq_th_t *th = eq_pop(&equiv_runq);
+
+    if (!th) {
+        switchto(&start_regs);
+    }
+
+    eq_th_t *old_thread = cur_thread;
+    eq_push(&equiv_runq, cur_thread);
+
+    cur_thread = th;
+    mismatch_on();
+    mismatch_pc_set(cur_thread->regs.regs[15]);
+    switchto_cswitch(&old_thread->regs, &cur_thread->regs);
+    mismatch_off();
+    not_reached();
+}
+
 // this is used to reinitilize registers.
 static inline regs_t equiv_regs_init(eq_th_t *p) {
     // get our current cpsr and clear the carry and set the mode
@@ -238,4 +256,5 @@ void equiv_init(void) {
     kmalloc_init();
     mini_step_init(equiv_hash_handler, 0);
     full_except_set_syscall(equiv_syscall_handler);
+    full_except_set_timer_int(equiv_timer_int_handler);
 }
