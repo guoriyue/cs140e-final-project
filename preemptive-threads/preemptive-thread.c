@@ -5,6 +5,7 @@
 #include "timer-interrupt.h"
 #include "preemptive-thread.h"
 #include "timer-handler-int.c"
+#include "rpi-interrupts.h"
 // tracing code.  set <trace_p>=0 to stop tracing
 enum { trace_p = 1};
 #define th_trace(args...) do {                          \
@@ -111,10 +112,10 @@ enum {
     LR_OFFSET = 8
 };
 
-// // return pointer to the current thread.  
-// preemptive_thread_t *preemptive_cur_thread(void) {
-//     return cur_thread;
-// }
+// return pointer to the current thread.  
+preemptive_thread_t *preemptive_cur_thread(void) {
+    return cur_thread;
+}
 
 // create a new thread.
 preemptive_thread_t *preemptive_fork(void (*code)(void *arg), void *arg) {
@@ -278,7 +279,7 @@ void interrupt_preemptive_threads(unsigned pc, unsigned sp) {
     // cur_thread->saved_sp = (uint32_t *)sp;
     // cur_thread = scheduler_thread;
     // must be incorrect
-    preemptive_cswitch(scheduler_thread->saved_sp, cur_thread->saved_sp);
+    preemptive_cswitch(&scheduler_thread->saved_sp, cur_thread->saved_sp);
 }
 
 void preemptive_thread_start(int preemptive_t) {
