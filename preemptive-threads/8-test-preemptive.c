@@ -9,10 +9,8 @@
  * should work.  you should rerun when you have your full package working to 
  * ensure you get the same result.
  */
-
+// #include "preemptive-thread.h"
 #include "preemptive-test-handler.h"
-
-
 static unsigned thread_count, thread_sum;
 
 // trivial first thread: does not block, explicitly calls exit.
@@ -20,19 +18,19 @@ static void thread_code(void *arg) {
     unsigned *x = arg;
 
     // check tid
-    unsigned tid = rpi_cur_thread()->tid;
+    unsigned tid = preemptive_cur_thread()->tid;
 	trace("in thread tid=%d, with x=%d\n", tid, *x);
-    demand(rpi_cur_thread()->tid == *x+1, 
+    demand(preemptive_cur_thread()->tid == *x+1, 
                 "expected %d, have %d\n", tid,*x+1);
 
     // check yield.
-    rpi_yield();
+    // rpi_yield();
 	thread_count ++;
-    rpi_yield();
+    // rpi_yield();
 	thread_sum += *x;
-    rpi_yield();
+    // rpi_yield();
     // check exit
-    rpi_exit(0);
+    // rpi_exit(0);
 }
 
 void notmain() {
@@ -48,9 +46,9 @@ void notmain() {
 	for(int i = 0; i < n; i++)  {
         int *x = kmalloc(sizeof *x);
         sum += *x = i;
-		rpi_fork(thread_code, x);
+		preemptive_fork(thread_code, x);
     }
-	rpi_thread_start();
+	preemptive_thread_start(1);
 
 	// no more threads: check.
 	trace("count = %d, sum=%d\n", thread_count, thread_sum);

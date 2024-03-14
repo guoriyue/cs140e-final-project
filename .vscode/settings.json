@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "test-header.h": "c"
+        "test-header.h": "c",
+        "preemptive-test-handler.h": "c",
+        "preemptive-thread.h": "c",
+        "timer-interrupt.h": "c"
     }
 }

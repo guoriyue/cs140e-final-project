@@ -44,13 +44,13 @@ enum {
     THREAD_EXITED 
 };
 
-typedef struct rpi_thread {
+typedef struct preemptive_thread {
     // SUGGESTION:
     //     check that this is within <stack> (see last field)
     //     should never point outside.
     uint32_t *saved_sp;
 
-	struct rpi_thread *next;
+	struct preemptive_thread *next;
 	uint32_t tid;
 
     // only used for part1: useful for testing without cswitch
@@ -59,7 +59,7 @@ typedef struct rpi_thread {
     
     const char *annot;
     // threads waiting on the current one to exit.
-    // struct rpi_thread *waiters;
+    // struct preemptive_thread *waiters;
 
 	uint32_t stack[THREAD_MAXSTACK];
 
@@ -67,18 +67,18 @@ typedef struct rpi_thread {
     int state;
     // the priority of the thread.
     int priority;
-} rpi_thread_t;
+} preemptive_thread_t;
 
-typedef struct rpi_thread_mutex {
-    rpi_thread_t *owner;
+typedef struct preemptive_thread_mutex {
+    preemptive_thread_t *owner;
     int locked;
-} rpi_thread_mutex;
+} preemptive_thread_mutex;
 
-_Static_assert(offsetof(rpi_thread_t, stack) % 8 == 0, 
+_Static_assert(offsetof(preemptive_thread_t, stack) % 8 == 0, 
                             "must be 8 byte aligned");
 
 // statically check that the register save area is at offset 0.
-_Static_assert(offsetof(rpi_thread_t, saved_sp) == 0, 
+_Static_assert(offsetof(preemptive_thread_t, saved_sp) == 0, 
                 "stack save area must be at offset 0");
 
 // main routines.
@@ -87,25 +87,25 @@ _Static_assert(offsetof(rpi_thread_t, saved_sp) == 0,
 
 // starts the thread system: only returns when there are
 // no more runnable threads. 
-void rpi_thread_start(int preemptive_t);
+void preemptive_thread_start(int preemptive_t);
 
 // get the pointer to the current thread.  
-rpi_thread_t *rpi_cur_thread(void);
+preemptive_thread_t *preemptive_cur_thread(void);
 
 
 // create a new thread that takes a single argument.
-typedef void (*rpi_code_t)(void *);
+typedef void (*preemptive_code_t)(void *);
 
-rpi_thread_t *rpi_fork(rpi_code_t code, void *arg);
+preemptive_thread_t *preemptive_fork(preemptive_code_t code, void *arg);
 
 // exit current thread: switch to the next runnable
 // thread, or exit the threads package.
-void rpi_exit(int exitcode);
+void preemptive_exit(int exitcode);
 
 // yield the current thread.
-void rpi_yield(void);
+void preemptive_yield(void);
 
-void rpi_sleep(unsigned t);
+void preemptive_sleep(unsigned t);
 
 
 /***************************************************************
@@ -117,45 +117,45 @@ void rpi_sleep(unsigned t);
 //  - save the current register values into <old_save_area>
 //  - load the values in <new_save_area> into the registers
 //  reutrn to the caller (which will now be different!)
-void rpi_cswitch(uint32_t **old_sp_save, const uint32_t *new_sp);
+void preemptive_cswitch(uint32_t **old_sp_save, const uint32_t *new_sp);
 
 // returns the stack pointer (used for checking).
-const uint8_t *rpi_get_sp(void);
+const uint8_t *preemptive_get_sp(void);
 
 // check that: the current thread's sp is within its stack.
-void rpi_stack_check(void);
+void preemptive_stack_check(void);
 
 // do some internal consistency checks --- used for testing.
-void rpi_internal_check(void);
+void preemptive_internal_check(void);
 
 #if 0
-void rpi_wait(rpi_cond_t *c, lock_t *l);
+void preemptive_wait(preemptive_cond_t *c, lock_t *l);
 
 // assume non-preemptive: if you share with interrupt
 // will have to modify.
-void rpi_lock(lock_t *l);
-void rpi_unlock(lock_t *l);
+void preemptive_lock(lock_t *l);
+void preemptive_unlock(lock_t *l);
 
 static inline void lock(lock_t *l) {
     while(get32(l)) != 0)
-        rpi_yield();
+        preemptive_yield();
 }
 static inline void unlock(lock_t *l) {
     *l = 0;
 }
 #endif
 
-// rpi_thread helpers
-static inline void *rpi_arg_get(rpi_thread_t *t) {
+// preemptive_thread helpers
+static inline void *preemptive_arg_get(preemptive_thread_t *t) {
     return t->arg;
 }
-static inline void rpi_arg_put(rpi_thread_t *t, void *arg) {
+static inline void preemptive_arg_put(preemptive_thread_t *t, void *arg) {
     t->arg = arg;
 }
-static inline unsigned rpi_tid(void) {
-    rpi_thread_t *t = rpi_cur_thread();
+static inline unsigned preemptive_tid(void) {
+    preemptive_thread_t *t = preemptive_cur_thread();
     if(!t)
-        panic("rpi_threads not running\n");
+        panic("preemptive_threads not running\n");
     return t->tid;
 }
 

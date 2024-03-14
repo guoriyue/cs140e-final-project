@@ -22,7 +22,8 @@ COMMON_SRC += rpi-thread-asm.S
 # STAFF_OBJS += staff-rpi-thread-asm.o
 
 # switch these when implemented.
-COMMON_SRC += rpi-thread.c
+# COMMON_SRC += rpi-thread.c
+COMMON_SRC += preemptive-thread.c
 # STAFF_OBJS += staff-rpi-thread.o
 STAFF_OBJS += staff-kmalloc.o
 
