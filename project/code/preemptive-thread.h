@@ -21,6 +21,4 @@ void run(void);
 
 th_t *fork(void (*fn)(void*), void *arg);
 
-void exit(uint32_t ret);
-
 #endif

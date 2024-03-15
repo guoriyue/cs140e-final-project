@@ -12,7 +12,7 @@
 @   - lr pointer in r2
 @
 MK_FN(priv_get_sp_lr_asm)
-    @ b staff_priv_get_sp_lr_asm
+    b staff_priv_get_sp_lr_asm
     mrs r3, cpsr
     msr cpsr_c, r0
     prefetch_flush(r12)
@@ -31,7 +31,7 @@ MK_FN(priv_get_sp_lr_asm)
 @
 @ switch to user mode loading r0-r15, and cpsr from <r>
 MK_FN(switchto_user_asm)
-    @ b staff_switchto_user_asm
+    b staff_switchto_user_asm
     mov r1, #15
     lsl r1, #2
     add sp, r0, r1
@@ -43,7 +43,7 @@ MK_FN(switchto_user_asm)
 @ 
 @ void switchto_priv_asm(regs_t *r)  __attribute__((noreturn));
 MK_FN(switchto_priv_asm)
-    @ b staff_switchto_priv_asm
+    b staff_switchto_priv_asm
     ldr r1, [r0, #64]
     msr cpsr_csxf, r1
     ldm r0, {r0 - r15}
@@ -58,7 +58,7 @@ MK_FN(switchto_priv_asm)
 @ and call the right switchto on <next>
 MK_FN(cswitchto_priv_asm)
     @ initially just forward to ours.
-    @ b staff_cswitchto_priv_asm
+    b staff_cswitchto_priv_asm
 
     @ to implement:
     @ 1. save all the callee regs (just like in your threads library)
@@ -101,7 +101,7 @@ MK_FN(cswitchto_priv_asm)
 @ and call the right switchto on <next>
 MK_FN(cswitchto_user_asm)
     @ initially just forward to ours.
-    @ b staff_cswitchto_priv_asm
+    b staff_cswitchto_priv_asm
 
     @ asm_todo("save the registers: identical to <switchto_priv_asm>")
     str r4, [r0, #(4*4)]

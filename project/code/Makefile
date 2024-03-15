@@ -11,8 +11,8 @@ COMMON_SRC += equiv-threads.c
 COMMON_SRC += preemptive-thread.c
 
 # you'll be replacing these.
-#STAFF_OBJS := staff-full-except-asm.o  
-#STAFF_OBJS += staff-switchto-asm.o
+STAFF_OBJS := staff-full-except-asm.o  
+STAFF_OBJS += staff-switchto-asm.o
 
 # define this if you need to give the device for your pi
 TTYUSB = 

@@ -1,4 +1,5 @@
 #include "rpi.h"
+#include "mini-step.h"
 #include "preemptive-thread.h"
 
 enum { stack_size = 8192 * 8 };
@@ -15,13 +16,78 @@ static th_t * volatile cur_thread;
 static regs_t start_regs;
 
 #undef trace
-#define trace(args...) do {                                 \
-    if(verbose_p) {                                         \
-        printk("TRACE:%s:", __FUNCTION__); printk(args);    \
-    }                                                       \
+#define trace(args...) do {                             \
+    printk("TRACE:%s:", __FUNCTION__); printk(args);    \
 } while(0)
 
+static __attribute__((noreturn)) 
+void schedule(void) 
+{
+    assert(cur_thread);
+
+    th_t *th = eq_pop(&runq);
+    if(th) {
+        output("switching from tid=%d,pc=%x to tid=%d,pc=%x,sp=%x\n", 
+                cur_thread->tid, 
+                cur_thread->regs.regs[REGS_PC],
+                th->tid,
+                th->regs.regs[REGS_PC],
+                th->regs.regs[REGS_SP]);
+        eq_append(&runq, cur_thread);
+        cur_thread = th;
+    }
+    uart_flush_tx();
+    // mismatch_run(&cur_thread->regs);
+    while (!uart_can_put8())
+        ;
+    switchto(&cur_thread->regs);
+}
+
+/******************************************************************
+ * tiny syscall setup.
+ */
+int syscall_trampoline(int sysnum, ...);
+
+enum {
+    EQUIV_EXIT = 0,
+    EQUIV_PUTC = 1
+};
+
 void sys_equiv_exit(uint32_t ret);
+
+static int equiv_syscall_handler(regs_t *r) {
+    trace("handler is called.\n");
+    let th = cur_thread;
+    assert(th);
+    th->regs = *r;  // update the registers
+
+    uart_flush_tx();
+
+    unsigned sysno = r->regs[0];
+    switch(sysno) {
+    case EQUIV_PUTC: 
+        uart_put8(r->regs[1]);
+        break;
+    case EQUIV_EXIT: 
+        trace("thread=%d exited with code=%d", 
+            th->tid, r->regs[1]);
+        th_t *th = eq_pop(&runq);
+
+        if (!th) {
+            trace("done with all threads\n");
+            switchto(&start_regs);
+        }
+
+        cur_thread = th;
+        while (!uart_can_put8())
+            ;
+        switchto(&cur_thread->regs);
+
+    default:
+        panic("illegal system call\n");
+    }
+    schedule();
+}
 
 // this is used to reinitilize registers.
 static inline regs_t regs_init(th_t *p) {
@@ -40,6 +106,7 @@ static inline regs_t regs_init(th_t *p) {
 }
 
 th_t *fork(void (*fn)(void*), void *arg) {
+    trace("forking a fn.\n");
     th_t *th = kmalloc_aligned(stack_size, 8);
 
     static unsigned ntids = 1;
@@ -55,4 +122,19 @@ th_t *fork(void (*fn)(void*), void *arg) {
 
     eq_push(&runq, th);
     return th;
+}
+
+void run(void) {
+    trace("run\n");
+    cur_thread = eq_pop(&runq);
+    if (!cur_thread)
+        panic("run queue is empty.\n");
+    switchto_cswitch(&start_regs, &cur_thread->regs);
+}
+
+void init(void) {
+    trace("init func.\n");
+    kmalloc_init();
+    // handlers below
+    full_except_set_syscall(equiv_syscall_handler);
 }
