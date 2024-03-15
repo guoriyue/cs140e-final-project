@@ -53,4 +53,7 @@ eq_th_t *equiv_fork_nostack(void (*fn)(void*), void *arg, uint32_t expected_hash
 
 void equiv_verbose_on(void);
 void equiv_verbose_off(void);
+
+int equiv_timer_int_handler(void);
+
 #endif

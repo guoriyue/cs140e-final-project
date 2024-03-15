@@ -8,6 +8,7 @@ COMMON_SRC += switchto-asm.S
 COMMON_SRC += full-except-asm.S
 
 COMMON_SRC += equiv-threads.c
+COMMON_SRC += preemptive-thread.c
 
 # you'll be replacing these.
 #STAFF_OBJS := staff-full-except-asm.o  

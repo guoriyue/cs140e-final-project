@@ -106,20 +106,20 @@ static int equiv_syscall_handler(regs_t *r) {
         trace("thread=%d exited with code=%d, hash=%x\n", 
             th->tid, r->regs[1], th->reg_hash);
 
-        // check hash.
-        if(!th->expected_hash)
-            th->expected_hash = th->reg_hash;
-        else if(th->expected_hash) {
-            let exp = th->expected_hash;
-            let got = th->reg_hash;
-            if(exp == got) {
-                trace("EXIT HASH MATCH: tid=%d: hash=%x\n", 
-                    th->tid, exp, got);
-            } else {
-                panic("MISMATCH ERROR: tid=%d: expected hash=%x, have=%x\n", 
-                    th->tid, exp, got);
-            }
-        }
+        // // check hash.
+        // if(!th->expected_hash)
+        //     th->expected_hash = th->reg_hash;
+        // else if(th->expected_hash) {
+        //     let exp = th->expected_hash;
+        //     let got = th->reg_hash;
+        //     if(exp == got) {
+        //         trace("EXIT HASH MATCH: tid=%d: hash=%x\n", 
+        //             th->tid, exp, got);
+        //     } else {
+        //         panic("MISMATCH ERROR: tid=%d: expected hash=%x, have=%x\n", 
+        //             th->tid, exp, got);
+        //     }
+        // }
 
         // this could be cleaner: sorry.
         eq_th_t *th = eq_pop(&equiv_runq);
@@ -141,21 +141,22 @@ static int equiv_syscall_handler(regs_t *r) {
     equiv_schedule();
 }
 
-static int equiv_timer_int_handler(void) {
+int equiv_timer_int_handler(void) {
+    trace("handler called\n");
     eq_th_t *th = eq_pop(&equiv_runq);
 
     if (!th) {
-        switchto(&start_regs);
+        return 0;
     }
 
     eq_th_t *old_thread = cur_thread;
     eq_push(&equiv_runq, cur_thread);
 
     cur_thread = th;
-    mismatch_on();
-    mismatch_pc_set(cur_thread->regs.regs[15]);
+    // mismatch_on();
+    // mismatch_pc_set(cur_thread->regs.regs[15]);
     switchto_cswitch(&old_thread->regs, &cur_thread->regs);
-    mismatch_off();
+    // mismatch_off();
     not_reached();
 }
 

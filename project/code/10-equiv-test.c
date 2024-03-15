@@ -16,9 +16,11 @@ void equiv_puts(char *msg) {
 }
 
 void hello(void *msg) {
+    delay_ms(2000);
     equiv_puts("hello from 1\n");
 }
 void msg(void *msg) {
+    delay_ms(2000);
     equiv_puts(msg);
 }
 
@@ -53,6 +55,7 @@ void notmain(void) {
     equiv_refresh(th2);
     equiv_refresh(th3);
     equiv_run();
+    equiv_timer_int_handler();
     trace("stack passed!\n");
 
     output("---------------------------------------------------\n");
