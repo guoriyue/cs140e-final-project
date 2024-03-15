@@ -45,9 +45,9 @@ void notmain(void) {
     init();
 
     //equiv_puts("hello\n") ;   // do the smallest ones first.
-    //let th1 = run_single(0, hello1, 0);
+    let th1 = run_single(0, hello1, 0);
     let th2 = run_single(0, hello2, 0);
-    //let th3 = run_single(0, hello3, 0);
+    let th3 = run_single(0, hello3, 0);
     // th1->verbose_p = 0;
     // th2->verbose_p = 0;
     // th3->verbose_p = 0;

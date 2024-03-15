@@ -69,7 +69,7 @@ static int equiv_syscall_handler(regs_t *r) {
         uart_put8(r->regs[1]);
         break;
     case EQUIV_EXIT: 
-        trace("thread=%d exited with code=%d", 
+        trace("thread=%d exited with code=%d\n", 
             th->tid, r->regs[1]);
         th_t *th = eq_pop(&runq);
 
@@ -135,6 +135,7 @@ void run(void) {
 void init(void) {
     trace("init func.\n");
     kmalloc_init();
+    full_except_install(0);
     // handlers below
     full_except_set_syscall(equiv_syscall_handler);
 }
