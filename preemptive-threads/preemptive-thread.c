@@ -156,31 +156,31 @@ preemptive_thread_t *preemptive_fork(void (*code)(void *arg), void *arg) {
 }
 
 
-// // exit current thread.
-// //   - if no more threads, switch to the scheduler.
-// //   - otherwise context switch to the new thread.
-// //     make sure to set cur_thread correctly!
-// void preemptive_exit(int exitcode) {
-//     redzone_check(0);
+// exit current thread.
+//   - if no more threads, switch to the scheduler.
+//   - otherwise context switch to the new thread.
+//     make sure to set cur_thread correctly!
+void preemptive_exit(int exitcode) {
+    redzone_check(0);
 
-//     // when you switch back to the scheduler thread:
-//     //      th_trace("done running threads, back to scheduler\n");
-//     // todo("implement preemptive_exit");
-//     preemptive_thread_t* free_thread = cur_thread;
-//     Q_append(&freeq, cur_thread);
+    // when you switch back to the scheduler thread:
+    //      th_trace("done running threads, back to scheduler\n");
+    // todo("implement preemptive_exit");
+    preemptive_thread_t* free_thread = cur_thread;
+    Q_append(&freeq, cur_thread);
 
-//     cur_thread = Q_pop(&runq);
-//     if (cur_thread == NULL) {
-//         th_trace("done running threads, back to scheduler\n");
-//         preemptive_cswitch(&free_thread->saved_sp, scheduler_thread->saved_sp);
-//     }
-//     else {
-//         // preemptive_yield();
-//         preemptive_cswitch(&free_thread->saved_sp, cur_thread->saved_sp);
-//     }
-//     // should never return.
-//     not_reached();
-// }
+    cur_thread = Q_pop(&runq);
+    if (cur_thread == NULL) {
+        th_trace("done running threads, back to scheduler\n");
+        preemptive_cswitch(&free_thread->saved_sp, scheduler_thread->saved_sp);
+    }
+    else {
+        // preemptive_yield();
+        preemptive_cswitch(&free_thread->saved_sp, cur_thread->saved_sp);
+    }
+    // should never return.
+    not_reached();
+}
 
 // // yield the current thread.
 // //   - if the runq is empty, return.
@@ -239,6 +239,10 @@ preemptive_thread_t *preemptive_fork(void (*code)(void *arg), void *arg) {
 //     th_trace("done with all threads, returning\n");
 // }
 
+// this is used for syscalls.
+void syscall_vector(unsigned pc) {
+	printk("heeeeeeeerrrrrrrrr\n");
+}
 
 // client has to define this.
 void interrupt_preemptive_threads(unsigned pc, unsigned sp) {
@@ -282,13 +286,14 @@ void interrupt_preemptive_threads(unsigned pc, unsigned sp) {
     preemptive_cswitch(&scheduler_thread->saved_sp, cur_thread->saved_sp);
 }
 
+
 void preemptive_thread_start(int preemptive_t) {
     redzone_init();
     th_trace("starting threads!\n");
 
     // define this in assembly
-    extern uint32_t interrupt_vector_preemptive_threads[];
-    int_vec_init((void *)interrupt_vector_preemptive_threads);
+    extern uint32_t preemptive_threads_handlers[];
+    int_vec_init((void *)preemptive_threads_handlers);
 
     timer_interrupt_init(0x100);
     register_timer_handler(interrupt_preemptive_threads);
