@@ -7,9 +7,7 @@ objs/staff-full-except.o: staff-full-except.c \
  /Users/jiayangwang/Desktop/cs140e-24win//libpi/src/vector-base.h \
  /Users/jiayangwang/Desktop/cs140e-24win//libpi/libc/bit-support.h \
  /Users/jiayangwang/Desktop/cs140e-24win//libpi/include/asm-helpers.h \
- full-except.h switchto.h cpsr-util.h \
- /Users/jiayangwang/Desktop/cs140e-24win//libpi/include/rpi-interrupts.h \
- /Users/jiayangwang/Desktop/cs140e-24win//libpi/include/rpi.h \
+ full-except.h switchto.h cpsr-util.h rpi-interrupts.h \
  /Users/jiayangwang/Desktop/cs140e-24win//libpi/include/rpi-constants.h \
  /Users/jiayangwang/Desktop/cs140e-24win//libpi/include/rpi-inline-asm.h
 
@@ -35,9 +33,7 @@ switchto.h:
 
 cpsr-util.h:
 
-/Users/jiayangwang/Desktop/cs140e-24win//libpi/include/rpi-interrupts.h:
-
-/Users/jiayangwang/Desktop/cs140e-24win//libpi/include/rpi.h:
+rpi-interrupts.h:
 
 /Users/jiayangwang/Desktop/cs140e-24win//libpi/include/rpi-constants.h:
 

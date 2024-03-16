@@ -14,7 +14,6 @@
 // pushing multiple handlers cleanly.
 typedef void (*full_except_t)(regs_t *r);
 typedef int (*full_excepti_t)(regs_t *r);
-typedef int (*full_exceptn_t)(void);
 
 // call this first: <override_p>=0: give an error if there is already
 // a vector installed
@@ -34,6 +33,6 @@ full_except_t full_except_set_data_abort(full_except_t h);
 // syscall: maybe give a nesting option for this one.
 full_excepti_t full_except_set_syscall(full_excepti_t h);
 
-full_exceptn_t full_except_set_timer_int(full_exceptn_t h);
+full_except_t full_except_set_interrupt(full_except_t h);
 
 #endif
