@@ -136,5 +136,7 @@ void init(void) {
     trace("init func.\n");
     kmalloc_init();
     // handlers below
+    full_except_install(0);
+    // full_except_set_prefetch(mismatch_fault);
     full_except_set_syscall(equiv_syscall_handler);
 }
