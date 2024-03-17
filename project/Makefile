@@ -1,25 +1,22 @@
-SUBDIRS= # code
+COMMON_SRC += staff-full-except.c 
+# new
+COMMON_SRC += switchto-asm.S
+# new
+COMMON_SRC += full-except-asm.S
 
-.PHONY: all check clean
-all check clean: $(SUBDIRS)
+COMMON_SRC += preemptive-thread.c
+COMMON_SRC += preemptive-thread-asm.S
 
-all: TARGET=all
-check: TARGET=check
-clean: TARGET=clean
+# define this if you need to give the device for your pi
+TTYUSB = 
+BOOTLOADER = my-install
 
-# No, you can't do TARGET=$@, or at least I don't know how to.
+# set to 0 if you don't want it to run
+RUN=1
 
-# recursive call to make
-$(SUBDIRS): force
-	$(MAKE) -s -C $@ $(TARGET)
+START_ASM = staff-start.S
 
-clean:
-	rm -f *~ *.bak
+PROGS := preemptive-thread-test-1.c
 
-.PHONY: force
-	force :;
-
-checkoff:
-	make -C 1-vector-base$(STAFF)/ checkoff
-	make -C 2-gpio-int$(STAFF)/ checkoff
-	make -C 3-handlers-gpio-int$(STAFF)/ checkoff
+GREP_STR := 'TRACE:\|THREAD:\|ERROR:\|PANIC:' 
+include $(CS140E_2024_PATH)/libpi/mk/Makefile.template-fixed
