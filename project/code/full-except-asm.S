@@ -19,6 +19,20 @@
 
 #include "rpi-asm.h"
 
+.globl system_enable_interrupts
+system_enable_interrupts:
+    mrs r0,cpsr         @ move process status register (PSR) to r0
+    bic r0,r0,#(1<<7)	@ clear 7th bit. change to 4th bit, not enabling interrupts.
+    msr cpsr_c,r0		@ move r0 back to PSR
+    bx lr		        @ return. comment out this. 
+
+.globl system_disable_interrupts
+system_disable_interrupts:
+    mrs r0,cpsr		       
+    orr r0,r0,#(1<<7)	       @ set 7th bit: or in 0b100 0000
+    msr cpsr_c,r0
+    bx lr
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @  
 @ these are the non "full except" handlers that work just like all
@@ -144,6 +158,19 @@ syscall_full:
     bl syscall_full_except
     asm_not_reached();
 
+interrupt_full:
+    mov sp, #INT_STACK_ADDR
+    stm sp, {r0-r12, sp, lr}^
+    str lr, [sp, #(15*4)]
+    mrs r12, spsr
+    str r12, [sp, #(16*4)]
+
+    mov r0, sp
+    @mrs r1, spsr
+    @mov r2, lr
+
+    bl interrupt_except
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @ do not have to modify
 @
@@ -160,7 +187,7 @@ full_except_ints:
     b prefetch_handler_full @ 3, full
     b data_abort_full       @ 4, full
     b reset                 @ 5, generic
-    b interrupt             @ 6, generic
+    b interrupt_full        @ 6, generic
     b bad_exception
 
 bad_exception:

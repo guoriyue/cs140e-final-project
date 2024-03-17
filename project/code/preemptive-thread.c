@@ -1,5 +1,6 @@
 #include "rpi.h"
 #include "mini-step.h"
+#include "timer-interrupt.h"
 #include "preemptive-thread.h"
 
 enum { stack_size = 8192 * 8 };
@@ -56,7 +57,7 @@ enum {
 void sys_equiv_exit(uint32_t ret);
 
 static int equiv_syscall_handler(regs_t *r) {
-    trace("handler is called.\n");
+    trace("syscall handler is called.\n");
     let th = cur_thread;
     assert(th);
     th->regs = *r;  // update the registers
@@ -69,7 +70,7 @@ static int equiv_syscall_handler(regs_t *r) {
         uart_put8(r->regs[1]);
         break;
     case EQUIV_EXIT: 
-        trace("thread=%d exited with code=%d", 
+        trace("thread=%d exited with code=%d\n", 
             th->tid, r->regs[1]);
         th_t *th = eq_pop(&runq);
 
@@ -89,6 +90,34 @@ static int equiv_syscall_handler(regs_t *r) {
     schedule();
 }
 
+static void interrupt_handler(regs_t *r) {
+    trace("interrupt handler is called.\n");
+
+    dev_barrier();
+    unsigned pending = GET32(IRQ_basic_pending);
+    if((pending & RPI_BASIC_ARM_TIMER_IRQ) == 0)
+        return;
+    // PUT32(arm_timer_IRQClear, 1);
+    dev_barrier();
+
+    let th = cur_thread;
+    assert(th);
+    th->regs = *r;  // update the registers
+
+    th_t *next_th = eq_pop(&runq);
+
+    if (!next_th) {
+        trace("No more thread to switch to\n");
+        return;
+    }
+
+    trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, next_th->tid);
+    eq_push(&runq, th);
+    cur_thread = next_th;
+    switchto(&cur_thread->regs);
+
+}
+
 // this is used to reinitilize registers.
 static inline regs_t regs_init(th_t *p) {
     // get our current cpsr and clear the carry and set the mode
@@ -100,7 +129,7 @@ static inline regs_t regs_init(th_t *p) {
         .regs[REGS_PC] = p->fn,      // where we want to jump to
         .regs[REGS_SP] = p->stack_end,      // the stack pointer to use.
         .regs[REGS_LR] = (uint32_t)sys_equiv_exit, // where to jump if return.
-        .regs[REGS_CPSR] = cpsr             // the cpsr to use.
+        .regs[REGS_CPSR] = cpsr            // the cpsr to use.
     };
     return regs;
 }
@@ -129,14 +158,19 @@ void run(void) {
     cur_thread = eq_pop(&runq);
     if (!cur_thread)
         panic("run queue is empty.\n");
+    system_enable_interrupts();
     switchto_cswitch(&start_regs, &cur_thread->regs);
 }
 
 void init(void) {
     trace("init func.\n");
     kmalloc_init();
+    timer_interrupt_init(0x10);
+    // system_enable_interrupts();
+    full_except_install(0);
     // handlers below
     full_except_install(0);
     // full_except_set_prefetch(mismatch_fault);
     full_except_set_syscall(equiv_syscall_handler);
+    full_except_set_interrupt(interrupt_handler);
 }

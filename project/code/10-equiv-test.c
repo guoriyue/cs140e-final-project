@@ -1,5 +1,6 @@
 #include "rpi.h"
 #include "preemptive-thread.h"
+#include "timer-interrupt.h"
 
 // lie about arg so we don't have to cast.
 void nop_10(void *);
@@ -17,17 +18,26 @@ void equiv_puts(char *msg) {
 
 void hello1(void *msg) {
     // delay_ms(2000);
-    printk("hello from 1.\n");
+    while (1) {
+        delay_ms(100);
+        printk("hello from 1.\n");
+    }
 }
 
 void hello2(void *msg) {
-    printk("hello from 2.\n");
+    while (1) {
+        delay_ms(100);
+        printk("hello from 2.\n");
+    }
     // equiv_puts("hello from 2\n");
     // sys_equiv_exit(0);
 }
 
 void hello3(void *msg) {
-    printk("hello from 3.\n");
+    while (1) {
+        delay_ms(100);
+        printk("hello from 3.\n");
+    }
 }
 
 // void msg(void *msg) {
@@ -45,9 +55,9 @@ void notmain(void) {
     init();
 
     //equiv_puts("hello\n") ;   // do the smallest ones first.
-    //let th1 = run_single(0, hello1, 0);
+    let th1 = run_single(0, hello1, 0);
     let th2 = run_single(0, hello2, 0);
-    //let th3 = run_single(0, hello3, 0);
+    let th3 = run_single(0, hello3, 0);
     // th1->verbose_p = 0;
     // th2->verbose_p = 0;
     // th3->verbose_p = 0;
