@@ -7,6 +7,8 @@ COMMON_SRC += full-except-asm.S
 COMMON_SRC += preemptive-thread.c
 COMMON_SRC += preemptive-thread-asm.S
 
+COMMON_SRC += mini-step.c
+
 # define this if you need to give the device for your pi
 TTYUSB = 
 BOOTLOADER = my-install
