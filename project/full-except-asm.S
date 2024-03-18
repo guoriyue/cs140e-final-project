@@ -166,8 +166,8 @@ interrupt_full:
     str r12, [sp, #(16*4)]
 
     mov r0, sp
-    @mrs r1, spsr
-    @mov r2, lr
+    @ mrs r1, spsr
+    @ mov r2, lr
 
     bl interrupt_except
 

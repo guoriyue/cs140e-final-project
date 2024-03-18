@@ -95,7 +95,7 @@ int syscall_full_except(regs_t *r, uint32_t spsr, uint32_t pc) {
     switchto(r);
 }
 
-int interrupt_except(regs_t *r) {
+void interrupt_except(regs_t *r) {
     interrupt_handler(r);
     switchto(r);
 }

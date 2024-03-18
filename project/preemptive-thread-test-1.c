@@ -9,35 +9,31 @@ void mov_ident(void *);
 void small1(void *);
 void small2(void *);
 
-void sys_equiv_putc(uint8_t ch);
-
-void equiv_puts(char *msg) {
-    for(; *msg; msg++)
-        sys_equiv_putc(*msg);
-}
-
 void hello1(void *msg) {
-    // delay_ms(2000);
-    while (1) {
-        delay_ms(100);
-        printk("hello from 1.\n");
-    }
+    printk("hello from 1.\n");
+    printk("hello from 1.\n");
+    // while (1) {
+    //     delay_ms(100);
+    //     printk("hello from 1.\n");
+    // }
 }
 
 void hello2(void *msg) {
-    while (1) {
-        delay_ms(100);
-        printk("hello from 2.\n");
-    }
-    // equiv_puts("hello from 2\n");
-    // sys_equiv_exit(0);
+    printk("hello from 2.\n");
+    printk("hello from 2.\n");
+    // while (1) {
+    //     delay_ms(100);
+    //     printk("hello from 2.\n");
+    // }
 }
 
 void hello3(void *msg) {
-    while (1) {
-        delay_ms(100);
-        printk("hello from 3.\n");
-    }
+    printk("hello from 3.\n");
+    printk("hello from 3.\n");
+    // while (1) {
+    //     delay_ms(100);
+    //     printk("hello from 3.\n");
+    // }
 }
 
 // void msg(void *msg) {
@@ -58,14 +54,7 @@ void notmain(void) {
     let th1 = run_single(0, hello1, 0);
     let th2 = run_single(0, hello2, 0);
     let th3 = run_single(0, hello3, 0);
-    // th1->verbose_p = 0;
-    // th2->verbose_p = 0;
-    // th3->verbose_p = 0;
-
-    // equiv_refresh(th1);
-    // equiv_refresh(th2);
-    // equiv_refresh(th3);
-    // equiv_run();
+    
     pre_run();
     trace("stack passed!\n");
 

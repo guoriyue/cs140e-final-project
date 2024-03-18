@@ -24,4 +24,8 @@ void pre_run(void);
 pre_th_t *pre_fork(void (*fn)(void*), void *arg);
 
 void pre_exit(void);
+
+static pre_th_t *pre_th_alloc(void);
+
+void switch_to_sys_mode();
 #endif
