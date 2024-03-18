@@ -138,8 +138,9 @@ void scheduler(void) {
         // eq_append(&runq, cur_thread);
         cur_thread = th;
         trace("switching from scheduler to tid=%d\n", cur_thread->tid);
-        switchto(&cur_thread->regs);
-        // switchto_cswitch(&scheduler_thread->regs, &cur_thread->regs);
+        // switchto(&cur_thread->regs);
+
+        switchto_cswitch(&scheduler_thread->regs, &cur_thread->regs);
     }
 }
 void pre_run(void) {
@@ -168,23 +169,19 @@ void pre_run(void) {
 
     if(!scheduler_thread) {
         scheduler_thread = pre_th_alloc();
-        scheduler_thread->fn = (uint32_t)scheduler;
-        scheduler_thread->stack_start = (uint32_t)scheduler_thread;
-        scheduler_thread->stack_end = scheduler_thread->stack_start + stack_size;
-        scheduler_thread->regs = regs_init(scheduler_thread);
+        // scheduler_thread->fn = (uint32_t)scheduler;
+        // scheduler_thread->stack_start = (uint32_t)scheduler_thread;
+        // scheduler_thread->stack_end = scheduler_thread->stack_start + stack_size;
+        // scheduler_thread->regs = regs_init(scheduler_thread);
         cur_thread = scheduler_thread;
     }
+
+    scheduler();
+
     
-    switchto_cswitch(&start_regs, &scheduler_thread->regs);
-    // scheduler();
+    // switchto_cswitch(&start_regs, &scheduler_thread->regs);
     trace("done with all threads\n");
 }
-
-enum {
-    EQUIV_EXIT = 0,
-    EQUIV_PUTC = 1
-};
-
 
 static int pre_syscall_handler(regs_t *r) {
     trace("syscall: pc=%x\n", r->regs[REGS_PC]);

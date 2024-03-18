@@ -6,6 +6,7 @@ MK_FN(pre_init_trampoline)
     blx r1
     bl pre_exit
 
+
 MK_FN(switch_to_sys_mode)
     mov r0, lr
     mov r1, sp

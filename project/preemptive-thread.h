@@ -28,4 +28,6 @@ void pre_exit(void);
 static pre_th_t *pre_th_alloc(void);
 
 void switch_to_sys_mode();
+
+void cswitch_from_scheduler(uint32_t **old_reg_save, uint32_t *new_reg);
 #endif
