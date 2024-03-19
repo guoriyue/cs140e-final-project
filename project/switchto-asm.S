@@ -80,7 +80,9 @@ MK_FN(cswitchto_priv_asm)
 
     str sp, [r0, #(13*4)]
     str lr, [r0, #(14*4)]
+    @ sub lr, lr, #4
     str lr, [r0, #(15*4)]
+    @ add lr, lr, #4
 
     mrs r12, cpsr
     str r12, [r0, #(16*4)]
@@ -115,8 +117,9 @@ MK_FN(cswitchto_user_asm)
 
     str sp, [r0, #(13*4)]
     str lr, [r0, #(14*4)]
+    @ sub lr, lr, #4
     str lr, [r0, #(15*4)]
-
+    @ add lr, lr, #4
     mrs r12, cpsr
     str r12, [r0, #(16*4)]
 

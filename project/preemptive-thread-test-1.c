@@ -19,21 +19,21 @@ void hello1(void *msg) {
 }
 
 void hello2(void *msg) {
-    printk("hello from 2.\n");
-    printk("hello from 2.\n");
-    // while (1) {
-    //     delay_ms(100);
-    //     printk("hello from 2.\n");
-    // }
+    // printk("hello from 2.\n");
+    // printk("hello from 2.\n");
+    while (1) {
+        delay_ms(100);
+        printk("hello from 2.\n");
+    }
 }
 
 void hello3(void *msg) {
-    printk("hello from 3.\n");
-    printk("hello from 3.\n");
-    // while (1) {
-    //     delay_ms(100);
-    //     printk("hello from 3.\n");
-    // }
+    // printk("hello from 3.\n");
+    // printk("hello from 3.\n");
+    while (1) {
+        delay_ms(100);
+        printk("hello from 3.\n");
+    }
 }
 
 // void msg(void *msg) {

@@ -166,8 +166,8 @@ interrupt_full:
     str r12, [sp, #(16*4)]
 
     mov r0, sp
-    @ mrs r1, spsr
-    @ mov r2, lr
+    @mrs r1, spsr
+    @mov r2, lr
 
     bl interrupt_except
 
@@ -178,20 +178,64 @@ interrupt_full:
 @ no different than other labs, other than what
 @ we call.
 
+
+@ syscall_interrupt_asm:
+@   @ get the user/system mode banked sp
+@   mov sp, #INT_STACK_ADDR
+@   sub sp, sp, #4
+@   stm sp, {sp}^
+@   ldr sp, [sp]
+
+@   sub sp, sp, #64
+@   stm sp, {r0-r12,lr}^
+@   ldm sp, {r2-r5}
+@   add sp, sp, #56
+@   stm sp, {lr}^
+@   add sp, sp, #4
+@   mrs r1, spsr
+@   stm sp, {r1}
+@   sub sp, sp, #60
+
+@   mov r1, sp
+
+@   mov sp, #INT_STACK_ADDR
+@   sub sp, sp, #4
+@   str r1, [sp]
+@   ldm sp, {sp}^
+
+@   sub lr, lr, #4
+@   mov r0, lr
+@   add sp, sp, #4
+@   bl  syscall_vector 
+@   asm_not_reached()
+
 .align 5; 
 .globl full_except_ints
 full_except_ints: 
-    b reset                 @ 0, generic
-    b undef                 @ 1, generic
+    @ b unhandled_reset                 @ 0, generic
+    @ b unhandled_undefined_instruction                 @ 1, generic
+    b reset
+    b undef
+    @ b unhandled_swi          @ 2, full
     b syscall_full          @ 2, full
     b prefetch_handler_full @ 3, full
     b data_abort_full       @ 4, full
-    b reset                 @ 5, generic
-    b interrupt_full        @ 6, generic
-    b bad_exception
+    @ b interrupt
+    @ b unhandled_prefetch_abort @ 3, full
+    @ b unhandled_data_abort       @ 4, full
+    b interrupt                 @ 5, generic
+    b interrupt_full            @ 6, generic
+    @ b bad_exception
 
-bad_exception:
-  asm_bad_exception("should not reach here")
+    
+
+
+
+
+@ bad_exception:
+@   asm_bad_exception("should not reach here")
+
+
 
 @ simple system call trampoline; doesn't really belong here
 @ but wvr.

@@ -15,6 +15,7 @@ typedef struct pre_th {
     uint32_t stack_end;
 } pre_th_t;
 
+
 typedef void (*fn_t)(void*);
 
 void pre_init(void);
@@ -27,7 +28,7 @@ void pre_exit(void);
 
 static pre_th_t *pre_th_alloc(void);
 
-void switch_to_sys_mode();
+// void switch_to_sys_mode();
 
-void cswitch_from_scheduler(uint32_t **old_reg_save, uint32_t *new_reg);
+pre_th_t *pre_cur_thread(void);
 #endif

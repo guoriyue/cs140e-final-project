@@ -97,7 +97,7 @@ int syscall_full_except(regs_t *r, uint32_t spsr, uint32_t pc) {
 
 void interrupt_except(regs_t *r) {
     interrupt_handler(r);
-    switchto(r);
+    // switchto(r);
 }
 
 // set client exception handler.

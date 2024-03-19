@@ -12,6 +12,8 @@ COMMON_SRC += mini-step.c
 # COMMON_SRC += pth.c
 # COMMON_SRC += pth.S
 
+# STAFF_OBJS := staff-switchto-asm.o
+
 # define this if you need to give the device for your pi
 TTYUSB = 
 BOOTLOADER = my-install
