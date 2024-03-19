@@ -9,6 +9,9 @@ COMMON_SRC += preemptive-thread-asm.S
 
 COMMON_SRC += mini-step.c
 
+# COMMON_SRC += pth.c
+# COMMON_SRC += pth.S
+
 # define this if you need to give the device for your pi
 TTYUSB = 
 BOOTLOADER = my-install
@@ -19,6 +22,7 @@ RUN=1
 START_ASM = staff-start.S
 
 PROGS := preemptive-thread-test-1.c
+# PROGS := ptest.c
 
 GREP_STR := 'TRACE:\|THREAD:\|ERROR:\|PANIC:' 
 include $(CS140E_2024_PATH)/libpi/mk/Makefile.template-fixed

@@ -3,6 +3,9 @@
         "test-header.h": "c",
         "preemptive-test-handler.h": "c",
         "preemptive-thread.h": "c",
-        "timer-interrupt.h": "c"
+        "timer-interrupt.h": "c",
+        "cpsr-util.h": "c",
+        "fast-hash32.h": "c",
+        "circular.h": "c"
     }
 }

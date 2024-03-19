@@ -11,9 +11,9 @@ objs/preemptive-thread-test-1.o: preemptive-thread-test-1.c \
  /Users/guomingfei/cs140e-project-master//libpi/include/rpi.h \
  /Users/guomingfei/cs140e-project-master//libpi/libc/bit-support.h \
  /Users/guomingfei/cs140e-project-master//libpi/include/rpi-inline-asm.h \
- /Users/guomingfei/cs140e-project-master//libpi/include/asm-helpers.h \
- /Users/guomingfei/cs140e-project-master//libpi/include/cpsr-util.h \
- /Users/guomingfei/cs140e-project-master//libpi/src/vector-base.h
+ timer-interrupt.h \
+ /Users/guomingfei/cs140e-project-master//libpi/include/rpi-armtimer.h \
+ /Users/guomingfei/cs140e-project-master//libpi/include/rpi-interrupts.h
 
 /Users/guomingfei/cs140e-project-master//libpi/include/rpi.h:
 
@@ -39,8 +39,8 @@ preemptive-thread.h:
 
 /Users/guomingfei/cs140e-project-master//libpi/include/rpi-inline-asm.h:
 
-/Users/guomingfei/cs140e-project-master//libpi/include/asm-helpers.h:
+timer-interrupt.h:
 
-/Users/guomingfei/cs140e-project-master//libpi/include/cpsr-util.h:
+/Users/guomingfei/cs140e-project-master//libpi/include/rpi-armtimer.h:
 
-/Users/guomingfei/cs140e-project-master//libpi/src/vector-base.h:
+/Users/guomingfei/cs140e-project-master//libpi/include/rpi-interrupts.h:
