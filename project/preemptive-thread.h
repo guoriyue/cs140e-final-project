@@ -13,6 +13,8 @@ typedef struct pre_th {
 
     uint32_t stack_start;
     uint32_t stack_end;
+
+    uint32_t priority;
 } pre_th_t;
 
 
@@ -22,7 +24,7 @@ void pre_init(void);
 
 void pre_run(void);
 
-pre_th_t *pre_fork(void (*fn)(void*), void *arg);
+pre_th_t *pre_fork(void (*fn)(void*), void *arg, uint32_t priority);
 
 void pre_exit(void);
 

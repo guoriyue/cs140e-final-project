@@ -43,7 +43,7 @@ void hello3(void *msg) {
 // }
 
 static pre_th_t * run_single(int N, void (*fn)(void*), void *arg) {
-    let th = pre_fork(fn, arg);
+    let th = pre_fork(fn, arg, 0);
     return th;
 }
 

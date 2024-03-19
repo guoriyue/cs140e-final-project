@@ -10,7 +10,7 @@ typedef struct rq {
 } rq_t;
 
 #include "queue-ext-T.h"
-gen_queue_T(eq, rq_t, head, tail, pre_th_t, next)
+gen_priority_queue_T(eq, rq_t, head, tail, pre_th_t, next)
 
 static rq_t runq;
 static rq_t freeq;
@@ -44,7 +44,7 @@ static void interrupt_handler(regs_t *r) {
     // printk("pc=%x\n", r->regs[REGS_PC]);
     r->regs[REGS_PC] -= 4;
     cur_thread->regs = *r;
-    eq_append(&runq, cur_thread);
+    eq_insert_with_priority(&runq, cur_thread);
     
     cur_thread = scheduler_thread;
     
@@ -74,7 +74,7 @@ static inline regs_t regs_init(pre_th_t *p) {
     return regs;
 }
 
-pre_th_t *pre_fork(void (*fn)(void*), void *arg) {
+pre_th_t *pre_fork(void (*fn)(void*), void *arg, uint32_t priority) {
     trace("forking a fn.\n");
     pre_th_t *th = pre_th_alloc();
     // kmalloc_aligned(stack_size, 8);
@@ -86,8 +86,9 @@ pre_th_t *pre_fork(void (*fn)(void*), void *arg) {
     th->stack_end = th->stack_start + stack_size;
 
     th->regs = regs_init(th);
+    th->priority = priority;
 
-    eq_append(&runq, th);
+    eq_insert_with_priority(&runq, th);
     return th;
 }
 
@@ -140,10 +141,11 @@ void scheduler(void) {
 }
 
 enum {
-    EQUIV_EXIT = 0,
+    PRE_EXIT = 0,
+    PRE_PUTC = 1
 };
 
-static int equiv_syscall_handler(regs_t *r) {
+static int pre_syscall_handler(regs_t *r) {
     trace("syscall handler is called.\n");
     let th = cur_thread;
     assert(th);
@@ -151,33 +153,33 @@ static int equiv_syscall_handler(regs_t *r) {
 
     // uart_flush_tx();
 
-    unsigned sysno = r->regs[0];
+    // unsigned sysno = r->regs[0];
     // eq_append(&runq, cur_thread);
     // cur_thread->regs = *r;
     cur_thread = scheduler_thread;
     switchto(&scheduler_thread->regs);
     return 0;
-    switch(sysno) {
-    case EQUIV_EXIT: 
-        trace("thread=%d exited with code=%d\n", 
-            th->tid, r->regs[1]);
-        pre_th_t *th = eq_pop(&runq);
+    // switch(sysno) {
+    // case PRE_EXIT: 
+    //     trace("thread=%d exited with code=%d\n", 
+    //         th->tid, r->regs[1]);
+    //     pre_th_t *th = eq_pop(&runq);
 
-        if (!th) {
-            trace("done with all threads\n");
-            switchto(&scheduler_thread->regs);
-        }
+    //     if (!th) {
+    //         trace("done with all threads\n");
+    //         switchto(&scheduler_thread->regs);
+    //     }
 
-        cur_thread = th;
-        while (!uart_can_put8())
-            ;
-        switchto(&cur_thread->regs);
+    //     cur_thread = th;
+    //     while (!uart_can_put8())
+    //         ;
+    //     switchto(&cur_thread->regs);
 
-    default:
-        panic("illegal system call\n");
-    }
-    // scheduler();
-    return 0;
+    // default:
+    //     panic("illegal system call\n");
+    // }
+    // // scheduler();
+    // return 0;
 }
 
 void pre_run(void) {
@@ -222,33 +224,33 @@ pre_th_t *pre_cur_thread(void) {
     return cur_thread;
 }
 
-static int pre_syscall_handler(regs_t *r) {
-    trace("syscall: pc=%x\n", r->regs[REGS_PC]);
-    uint32_t mode;
+// static int pre_syscall_handler(regs_t *r) {
+//     trace("syscall: pc=%x\n", r->regs[REGS_PC]);
+//     uint32_t mode;
 
-    mode = spsr_get() & 0b11111;
+//     mode = spsr_get() & 0b11111;
 
-    if(mode != USER_MODE && mode != SYS_MODE)
-        panic("mode = %b: expected %b\n", mode, USER_MODE);
-    else
-        trace("success: spsr is at user/sys level\n");
-    // dev_barrier();
-    // unsigned pending = GET32(IRQ_basic_pending);
-    // if((pending & RPI_BASIC_ARM_TIMER_IRQ) == 0)
-    //     return 0;
-    // PUT32(arm_timer_IRQClear, 1);
-    // dev_barrier();
+//     if(mode != USER_MODE && mode != SYS_MODE)
+//         panic("mode = %b: expected %b\n", mode, USER_MODE);
+//     else
+//         trace("success: spsr is at user/sys level\n");
+//     // dev_barrier();
+//     // unsigned pending = GET32(IRQ_basic_pending);
+//     // if((pending & RPI_BASIC_ARM_TIMER_IRQ) == 0)
+//     //     return 0;
+//     // PUT32(arm_timer_IRQClear, 1);
+//     // dev_barrier();
     
-    // pre_th_t *prev_th = cur_thread;
-    // eq_append(&runq, cur_thread);
-    // trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, scheduler_thread->tid);
-    // cur_thread->regs = *r;
+//     // pre_th_t *prev_th = cur_thread;
+//     // eq_append(&runq, cur_thread);
+//     // trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, scheduler_thread->tid);
+//     // cur_thread->regs = *r;
     
-    // cur_thread = scheduler_thread;
+//     // cur_thread = scheduler_thread;
     
-    // switchto(&scheduler_thread->regs);
-    return 0;
-}
+//     // switchto(&scheduler_thread->regs);
+//     return 0;
+// }
 
 void int_vec_init(void *v) {
     // if (!set_int_vector_ready()) {
@@ -290,7 +292,7 @@ void pre_init(void) {
     // handlers below
     // full_except_set_syscall(pre_syscall_handler);
     full_except_set_interrupt(interrupt_handler);
-    full_except_set_syscall(equiv_syscall_handler);
+    full_except_set_syscall(pre_syscall_handler);
 
     // full_except_set_syscall(pre_syscall_handler);
 }

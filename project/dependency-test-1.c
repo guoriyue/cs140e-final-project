@@ -47,7 +47,7 @@ void notmain() {
 	for(int i = 0; i < n; i++)  {
         int *x = kmalloc(sizeof *x);
         sum += *x = i;
-		pre_fork(thread_code, x, 0);
+		pre_fork(thread_code, x);
     }
 	pre_run();
 
