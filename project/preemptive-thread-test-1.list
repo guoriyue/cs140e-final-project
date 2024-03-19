@@ -1130,7 +1130,7 @@ Disassembly of section .text:
     8ff8:	e58d3038 	str	r3, [sp, #56]	; 0x38
     8ffc:	e594304c 	ldr	r3, [r4, #76]	; 0x4c
     9000:	e58d303c 	str	r3, [sp, #60]	; 0x3c
-    9004:	e2053080 	and	r3, r5, #128, 0	; 0x80
+    9004:	e3c53080 	bic	r3, r5, #128, 0	; 0x80
     9008:	e58d3040 	str	r3, [sp, #64]	; 0x40
     900c:	e3a05044 	mov	r5, #68, 0	; 0x44
     9010:	e1a02005 	mov	r2, r5

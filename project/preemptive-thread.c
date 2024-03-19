@@ -89,7 +89,7 @@ static inline regs_t regs_init(pre_th_t *p) {
         .regs[REGS_SP] = p->stack_end,      // the stack pointer to use.
         // .regs[REGS_LR] = (uint32_t)pre_exit, // where to jump if return.
         .regs[REGS_LR] = (uint32_t)sys_equiv_exit,
-        .regs[REGS_CPSR] = cpsr & (0b1<<7),            // the cpsr to use.
+        .regs[REGS_CPSR] = cpsr & (~0b10000000),            // the cpsr to use.
     };
     return regs;
 }
