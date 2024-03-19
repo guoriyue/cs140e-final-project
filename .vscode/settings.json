@@ -6,6 +6,7 @@
         "timer-interrupt.h": "c",
         "cpsr-util.h": "c",
         "fast-hash32.h": "c",
-        "circular.h": "c"
+        "circular.h": "c",
+        "helper-macros.h": "c"
     }
 }
