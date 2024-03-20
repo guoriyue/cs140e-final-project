@@ -47,6 +47,10 @@ pre_th_t *pre_cur_thread(void);
 void pre_yield(void);
 
 
+void sys_exit(void); // need to be called by the thread when it exits, otherwise the thread will run forever
+void sys_putc(uint8_t ch);
+
+
 // part 2: locks and semaphores
 struct semaphore 
 {

@@ -16,7 +16,7 @@ static unsigned tid = 1;
 static unsigned nalloced = 0;
 
 
-enum { trace_p = 1};
+enum { trace_p = 0};
 #define th_trace(args...) do {                          \
     if(trace_p) {                                       \
         trace(args);                                   \
@@ -148,13 +148,25 @@ enum {
     PRE_PUTC = 1
 };
 
+void print_regs(regs_t *r){
+    for (int i = 0; i < 17; i++) {
+        printk("r%d=%x\n", i, r->regs[i]);
+    }
+}
 static int pre_syscall_handler(regs_t *r) {
     th_trace("syscall handler is called.\n");
-    let th = cur_thread;
-    assert(th);
-    th->regs = *r;  // update the registers
-    cur_thread = scheduler_thread;
-    switchto(&scheduler_thread->regs);
+    uart_flush_tx();
+    uint32_t sysno = r->regs[0];
+    switch (sysno) {
+        case PRE_EXIT:
+            cur_thread = scheduler_thread;
+            switchto(&scheduler_thread->regs);
+        case PRE_PUTC:
+            uart_put8(r->regs[1]);
+            break;
+        default:
+            panic("unknown syscall: %d\n", sysno);
+    }
     return 0;
 }
 
@@ -171,6 +183,8 @@ void pre_run(void) {
         cur_thread = scheduler_thread;
     }
 
+    while(!uart_can_put8())
+        ;
     scheduler();
     // switchto_cswitch(&start_regs, &scheduler_thread->regs);
     th_trace("pre_run done with all threads\n");
@@ -182,15 +196,6 @@ pre_th_t *pre_cur_thread(void) {
 }
 
 void pre_yield(void) {
-    // cpsr_int_disable();
-    // uint32_t mode = spsr_get() & 0b11111;
-    // th_trace("mode = %b\n", mode);
-    // th_trace("thread=%d yielded\n", cur_thread->tid);
-    // set current mode to user mode
-    // cpsr_set(cpsr_inherit(USER_MODE, cpsr_get()) & (~0b10000000));
-    // cur_thread->regs = *r;
-    // printk("append eq pc=%x\n", cur_thread->regs.regs[REGS_PC]);
-    // eq_append(&runq, cur_thread);
     eq_insert_with_priority(&runq, cur_thread);
     // switchto(&scheduler_thread->regs);
     // return;
@@ -202,29 +207,13 @@ void pre_yield(void) {
         return;
     }
     else {
-        // printk("Switching from thread=%d to thread=%d,pc=%x\n", old->tid, cur_thread->tid, cur_thread->regs.regs[REGS_PC]);
-        
-        // 0000aa80 <uart_can_putc>:
-        // aa80:	e92d4010 	push	{r4, lr}
-        // aa84:	e59f0010 	ldr	r0, [pc, #16]	; aa9c <uart_can_putc+0x1c>
-        // aa88:	ebfff567 	bl	802c <GET32>
-        // aa8c:	e3100020 	tst	r0, #32, 0
 
         uart_flush_tx();
         // mismatch_run(&cur_thread->regs);
         while (!uart_can_put8())
             ;
         
-        // // printk("pc=%x\n", cur_thread->regs.regs[REGS_PC]);
-        // printk("old pc=%x\n", old->regs.regs[REGS_PC]);
-        // printk("switch to pc=%x\n", cur_thread->regs.regs[REGS_PC]);
-        // printk("mode_get(cpsr_get()) = %b\n", mode_get(cpsr_get()));
-        // switchto_cswitch(&scheduler_thread->regs, &cur_thread->regs);
         switchto(&cur_thread->regs);
-        // pre_cswitch(&old->regs, cur_thread->regs);
-        // &old->regs, 
-        // switchto(&cur_thread->regs);
-        // pre_cswitch(&old->regs, &cur_thread->regs);
     }
 }
 
@@ -262,67 +251,90 @@ void pre_exit(void) {
     switchto(&scheduler_thread->regs);
 }
 
-void thread_set_priority(int new_priority) {
-    cpsr_int_disable();
-    int32_t old_priority = cur_thread->priority;
-    cur_thread->priority = new_priority;
-    // if (!eq_empty(&cur_thread->donor_threads)) {
-    //     pre_th_t *highest_priority_donor_thread = eq_pop(&cur_thread->donor_threads);
-    //     if (highest_priority_donor_thread->priority > new_priority) {
-    //         cur_thread->priority = highest_priority_donor_thread->priority;
-    //     }
-    // }
 
-    thread_donate_priority(cur_thread);
-
-    if (old_priority > cur_thread->priority) {
-        pre_yield();
-    }
-    cpsr_int_enable();
-}
-
-void thread_donate_priority(pre_th_t *t) {
-    struct lock_t *l = t->wait_on_lock;
-    if (l->holder->priority >= t->priority) {
-        return;
-    }
-    l->holder->priority = t->priority;
-    thread_donate_priority(l->holder);
+void thread_unblock(pre_th_t *th) {
+    eq_insert_with_priority(&runq, th);
 }
 
 
-void lock_init (struct lock_t *lock)
+
+
+
+
+void sema_init(struct semaphore *sema, unsigned value) 
 {
-    lock->holder = NULL;
-    lock->locked = 1;
+  sema->value = value;
 }
 
-void lock_acquire (struct lock_t *lock)
+void sema_down(struct semaphore *sema) 
 {
-    cpsr_int_disable();
-    if (lock->locked == 0) {
-        lock->locked = 1;
-        lock->holder = pre_cur_thread();
-    } else {
-        printk("thread %d is waiting for the lock\n", pre_cur_thread()->tid);
-        eq_insert_with_priority(&lock->waiters, pre_cur_thread());
-        pre_yield();
-    }
-    cpsr_int_enable();
+  cpsr_int_disable();
+  if (sema->value == 0) {
+    eq_insert_with_priority(&sema->waiters, pre_cur_thread());
+    pre_yield();
+  }
+  sema->value--;
+  cpsr_int_enable();
 }
 
-void lock_release (struct lock_t *lock)
+int sema_try_down(struct semaphore *sema) 
 {
-    cpsr_int_disable();
-    if (eq_empty(&lock->waiters)) {
-        lock->locked = 0;
-        lock->holder = NULL;
-    } else {
-        pre_th_t *th = eq_pop(&lock->waiters);
-        lock->holder = th;
-    }
+  cpsr_int_disable();
+  if (sema->value > 0) {
+    sema->value--;
     cpsr_int_enable();
+    return 1;
+  }
+  cpsr_int_enable();
+  return 0;
 }
+
+void sema_up(struct semaphore *sema) 
+{
+  cpsr_int_disable();
+  if (!eq_empty(&sema->waiters)) {
+    pre_th_t *th = eq_pop(&sema->waiters);
+    eq_insert_with_priority(&runq, th);
+  }
+  sema->value++;
+  cpsr_int_enable();
+}
+
+
+
+
+// void lock_init (struct lock *l)
+// {
+//     lock->holder = NULL;
+//     lock->locked = 1;
+// }
+
+// void lock_acquire (struct lock *l)
+// {
+//     cpsr_int_disable();
+//     if (lock->locked == 0) {
+//         lock->locked = 1;
+//         lock->holder = pre_cur_thread();
+//     } else {
+//         printk("thread %d is waiting for the lock\n", pre_cur_thread()->tid);
+//         eq_insert_with_priority(&lock->waiters, pre_cur_thread());
+//         pre_yield();
+//     }
+//     cpsr_int_enable();
+// }
+
+// void lock_release (struct lock *l)
+// {
+//     cpsr_int_disable();
+//     if (eq_empty(&lock->waiters)) {
+//         lock->locked = 0;
+//         lock->holder = NULL;
+//     } else {
+//         pre_th_t *th = eq_pop(&lock->waiters);
+//         lock->holder = th;
+//     }
+//     cpsr_int_enable();
+// }
 
 // without donation
 // arm atomics for sync
@@ -330,3 +342,36 @@ void lock_release (struct lock_t *lock)
 // atomic compare and swap
 // ll sc lock
 // reset priority and donation
+
+
+
+
+
+// void thread_set_priority(int new_priority) {
+//     cpsr_int_disable();
+//     int32_t old_priority = cur_thread->priority;
+//     cur_thread->priority = new_priority;
+//     // if (!eq_empty(&cur_thread->donor_threads)) {
+//     //     pre_th_t *highest_priority_donor_thread = eq_pop(&cur_thread->donor_threads);
+//     //     if (highest_priority_donor_thread->priority > new_priority) {
+//     //         cur_thread->priority = highest_priority_donor_thread->priority;
+//     //     }
+//     // }
+
+//     thread_donate_priority(cur_thread);
+
+//     if (old_priority > cur_thread->priority) {
+//         pre_yield();
+//     }
+//     cpsr_int_enable();
+// }
+
+// void thread_donate_priority(pre_th_t *t) {
+//     struct lock_t *l = t->wait_on_lock;
+//     if (l->holder->priority >= t->priority) {
+//         return;
+//     }
+//     l->holder->priority = t->priority;
+//     thread_donate_priority(l->holder);
+// }
+
