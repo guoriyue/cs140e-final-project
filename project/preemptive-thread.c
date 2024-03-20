@@ -153,58 +153,13 @@ static int pre_syscall_handler(regs_t *r) {
     let th = cur_thread;
     assert(th);
     th->regs = *r;  // update the registers
-
-    // uart_flush_tx();
-
-    // unsigned sysno = r->regs[0];
-    // eq_append(&runq, cur_thread);
-    // cur_thread->regs = *r;
-    // exit
     cur_thread = scheduler_thread;
     switchto(&scheduler_thread->regs);
     return 0;
-    // switch(sysno) {
-    // case PRE_EXIT: 
-    //     th_trace("thread=%d exited with code=%d\n", 
-    //         th->tid, r->regs[1]);
-    //     pre_th_t *th = eq_pop(&runq);
-
-    //     if (!th) {
-    //         th_trace("done with all threads\n");
-    //         switchto(&scheduler_thread->regs);
-    //     }
-
-    //     cur_thread = th;
-    //     while (!uart_can_put8())
-    //         ;
-    //     switchto(&cur_thread->regs);
-
-    // default:
-    //     panic("illegal system call\n");
-    // }
-    // // scheduler();
-    // return 0;
 }
 
 void pre_run(void) {
     th_trace("run\n");
-    // switch_to_sys_mode();
-
-    // timer_interrupt_init(0x1000);
-    // full_except_install(0);
-    
-    // // full_except_ints
-
-    // // extern uint32_t pre_threads_ints[];
-    // // void *v = pre_threads_ints;
-    // // void *addr = vector_base_get();
-    // // if(!addr)
-    // //     vector_base_set(v);
-    // // else if(addr != v)
-    // //     panic("already have exception handlers installed: addr=%x\n", addr);
-
-    // full_except_set_interrupt(interrupt_handler);
-    // system_enable_interrupts();
     
     if(eq_empty(&runq)) {
         panic("run queue is empty.\n");
@@ -217,8 +172,6 @@ void pre_run(void) {
     }
 
     scheduler();
-
-    
     // switchto_cswitch(&start_regs, &scheduler_thread->regs);
     th_trace("pre_run done with all threads\n");
 }
@@ -276,38 +229,7 @@ void pre_yield(void) {
 }
 
 
-// static int pre_syscall_handler(regs_t *r) {
-//     th_trace("syscall: pc=%x\n", r->regs[REGS_PC]);
-//     uint32_t mode;
-
-//     mode = spsr_get() & 0b11111;
-
-//     if(mode != USER_MODE && mode != SYS_MODE)
-//         panic("mode = %b: expected %b\n", mode, USER_MODE);
-//     else
-//         th_trace("success: spsr is at user/sys level\n");
-//     // dev_barrier();
-//     // unsigned pending = GET32(IRQ_basic_pending);
-//     // if((pending & RPI_BASIC_ARM_TIMER_IRQ) == 0)
-//     //     return 0;
-//     // PUT32(arm_timer_IRQClear, 1);
-//     // dev_barrier();
-    
-//     // pre_th_t *prev_th = cur_thread;
-//     // eq_append(&runq, cur_thread);
-//     // th_trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, scheduler_thread->tid);
-//     // cur_thread->regs = *r;
-    
-//     // cur_thread = scheduler_thread;
-    
-//     // switchto(&scheduler_thread->regs);
-//     return 0;
-// }
-
 void int_vec_init(void *v) {
-    // if (!set_int_vector_ready()) {
-    //     return;
-    // }
     // turn off system interrupts
     cpsr_int_disable();
 
@@ -324,29 +246,15 @@ void int_vec_init(void *v) {
 void pre_init(void) {
     th_trace("init func.\n");
     kmalloc_init();
-    // th_trace("init func.\n");
-    // kmalloc_init();
     timer_interrupt_init(0x10000);
-    // system_enable_interrupts();
-    // full_except_install(0);
 
 
     extern uint32_t full_except_ints[];
     void *v = full_except_ints;
     int_vec_init(v);
-    // void *addr = vector_base_get();
-    // if(!addr)
-    //     vector_base_set(v);
-    // else if(addr != v)
-    //     panic("already have exception handlers installed: addr=%x\n", addr);
-
-
-    // handlers below
-    // full_except_set_syscall(pre_syscall_handler);
+    
     full_except_set_interrupt(interrupt_handler);
     full_except_set_syscall(pre_syscall_handler);
-
-    // full_except_set_syscall(pre_syscall_handler);
 }
 
 void pre_exit(void) {
@@ -415,3 +323,10 @@ void lock_release (struct lock_t *lock)
     }
     cpsr_int_enable();
 }
+
+// without donation
+// arm atomics for sync
+// better lock (disable interrupts bad performance)
+// atomic compare and swap
+// ll sc lock
+// reset priority and donation

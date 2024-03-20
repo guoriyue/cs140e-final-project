@@ -1,6 +1,7 @@
 #ifndef __PREEMPTIVE_THREAD_H__
 #define __EQUIV_THREAD_H__
 #include "switchto.h"
+#include "queue-ext-T.h"
 
 typedef struct pre_th {
     regs_t regs;
@@ -15,7 +16,7 @@ typedef struct pre_th {
 
     uint32_t priority;
 
-    struct lock_t* wait_on_lock;
+    struct lock_t* wait_on_lock; // the lock that the thread is waiting on
 } pre_th_t;
 
 
@@ -23,19 +24,10 @@ typedef struct rq {
     pre_th_t *head, *tail;
 } rq_t;
 
-#include "queue-ext-T.h"
 gen_priority_queue_T(eq, rq_t, head, tail, pre_th_t, next)
 
-struct lock_t {
-    pre_th_t *holder; // the thread that holds the lock
-    rq_t waiters;
-    volatile int locked; // 0 if unlocked, 1 if locked
-};
 
-void lock_init (struct lock_t *lock);
-void lock_acquire (struct lock_t *lock);
-void lock_release (struct lock_t *lock);
-
+// part 1: pre-emptive threads with priority scheduling
 typedef void (*fn_t)(void*);
 
 void pre_init(void);
@@ -54,6 +46,37 @@ pre_th_t *pre_cur_thread(void);
 
 void pre_yield(void);
 
+
+// part 2: locks and semaphores
+struct semaphore 
+{
+    int32_t value;             /* Current value. */
+    rq_t waiters;        /* List of waiting threads. */
+};
+
+void sema_init (struct semaphore *, unsigned value);
+void sema_down (struct semaphore *);
+int sema_try_down (struct semaphore *);
+void sema_up (struct semaphore *);
+void sema_self_test (void);
+
+
+
+struct lock {
+    pre_th_t *holder; // the thread that holds the lock
+    struct semaphore semaphore;
+};
+
+void lock_init (struct lock *l);
+void lock_acquire (struct lock *l);
+void lock_release (struct lock *l);
+int lock_try_acquire (struct lock *l);
+int lock_held_by_current_thread (const struct lock *l);
+
+
+
+
+// part 3: priority donation
 void thread_set_priority(int new_priority);
 void thread_donate_priority(pre_th_t *th);
 
