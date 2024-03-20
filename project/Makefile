@@ -24,7 +24,9 @@ RUN=1
 START_ASM = staff-start.S
 
 # PROGS := preemptive-thread-test-2.c
-PROGS := priority-test-1.c
+# PROGS := priority-test-1.c
+PROGS := priority-test-2.c
+# PROGS := dependency-test-1.c
 # PROGS := ptest.c
 
 GREP_STR := 'TRACE:\|THREAD:\|ERROR:\|PANIC:' 

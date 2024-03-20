@@ -9,51 +9,45 @@ void mov_ident(void *);
 void small1(void *);
 void small2(void *);
 
-
-static unsigned thread_count, thread_sum;
-
-// trivial first thread: does not block, explicitly calls exit.
-static void thread_code(void *arg) {
-    unsigned *x = arg;
-
-    // check tid
-    unsigned tid = pre_cur_thread()->tid;
-	trace("in thread tid=%d, with x=%d\n", tid, *x);
-    // debug("in thread tid=%d, with x=%d\n", tid, *x);
-    demand(pre_cur_thread()->tid == *x+1, 
-                "expected %d, have %d\n", tid,*x+1);
-
-    // check yield.
-    // pre_yield();
-	thread_count ++;
-    // pre_yield();
-	thread_sum += *x;
-    // pre_yield();
-    // check exit
-    // pre_exit(0);
-    trace("thread %d exiting\n", tid);
+void hello1(void *msg) {
+    printk("hello from 1.\n");
+    printk("hello from 1.\n");
+}
+void hello2_child(void *msg) {
+    printk("hello from 2 child.\n");
+    printk("hello from 2 child.\n");
 }
 
-void notmain() {
+void hello2(void *msg) {
+    let th = pre_fork(hello2_child, 0, 4);
+    printk("hello from 2.\n");
+    printk("hello from 2.\n");
+}
+
+void hello3_child(void *msg) {
+    printk("hello from 3 child.\n");
+    printk("hello from 3 child.\n");
+}
+void hello3(void *msg) {
+    printk("hello from 3.\n");
+    printk("hello from 3.\n");
+    let th = pre_fork(hello3_child, 0, 0);
+}
+
+static pre_th_t * run_single(void (*fn)(void*), void *arg, uint32_t pri) {
+    let th = pre_fork(fn, arg, pri);
+    return th;
+}
+
+void notmain(void) {
     pre_init();
 
-    // change this to increase the number of threads.
-	int n = 30;
-    trace("about to test summing of n=%d threads\n", n);
+    let th1 = run_single(hello1, 0, 3);
+    let th2 = run_single(hello2, 0, 2);
+    let th3 = run_single(hello3, 0, 1);
+    
+    pre_run();
+    trace("stack passed!\n");
 
-	thread_sum = thread_count = 0;
-
-    unsigned sum = 0;
-	for(int i = 0; i < n; i++)  {
-        int *x = kmalloc(sizeof *x);
-        sum += *x = i;
-		pre_fork(thread_code, x);
-    }
-	pre_run();
-
-	// no more threads: check.
-	trace("count = %d, sum=%d\n", thread_count, thread_sum);
-	assert(thread_count == n);
-	assert(thread_sum == sum);
-    trace("SUCCESS!\n");
+    clean_reboot();
 }

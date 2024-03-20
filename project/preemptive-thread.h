@@ -33,4 +33,21 @@ static pre_th_t *pre_th_alloc(void);
 // void switch_to_sys_mode();
 
 pre_th_t *pre_cur_thread(void);
+
+void pre_yield(void);
+
+typedef volatile uint32_t lock_t; // Define lock_t as a volatile uint32_t for atomic access
+
+// Corrected lock and unlock using your approach
+static inline void lock(lock_t *l) {
+    while(*l != 0) {
+        pre_yield(); // Wait for lock to be 0
+    }
+    *l = 1; // Acquire the lock
+}
+
+static inline void unlock(lock_t *l) {
+    *l = 0; // Release the lock
+}
+
 #endif

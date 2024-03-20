@@ -224,6 +224,27 @@ pre_th_t *pre_cur_thread(void) {
     return cur_thread;
 }
 
+void pre_yield(void) {
+    printk("thread=%d yielded\n", cur_thread->tid);
+    eq_append(&runq, cur_thread);
+    pre_th_t* old = cur_thread;
+    cur_thread = eq_pop(&runq);
+    printk("Switching from thread=%d to thread=%d\n", old->tid, cur_thread->tid);
+    // printk("pc=%x\n", cur_thread->regs.regs[REGS_PC]);
+    printk("switch to pc=%x\n", cur_thread->regs.regs[REGS_PC]);
+    if (cur_thread == old) {
+        return;
+    }
+    else {
+        uart_flush_tx();
+        // mismatch_run(&cur_thread->regs);
+        while (!uart_can_put8())
+            ;
+        switchto(&cur_thread->regs);
+    }
+}
+
+
 // static int pre_syscall_handler(regs_t *r) {
 //     trace("syscall: pc=%x\n", r->regs[REGS_PC]);
 //     uint32_t mode;
