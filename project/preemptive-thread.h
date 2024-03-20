@@ -30,11 +30,17 @@ void pre_exit(void);
 
 static pre_th_t *pre_th_alloc(void);
 
-// void switch_to_sys_mode();
+void switch_to_sys_mode();
 
 pre_th_t *pre_cur_thread(void);
 
 void pre_yield(void);
+
+// internal routine: 
+//  - save the current register values into <old_save_area>
+//  - load the values in <new_save_area> into the registers
+//  reutrn to the caller (which will now be different!)
+void pre_cswitch(regs_t *old, regs_t *new);
 
 typedef volatile uint32_t lock_t; // Define lock_t as a volatile uint32_t for atomic access
 

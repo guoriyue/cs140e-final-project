@@ -41,9 +41,16 @@ static void interrupt_handler(regs_t *r) {
     // pre_th_t *prev_th = cur_thread;
     
     trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, scheduler_thread->tid);
-    // printk("pc=%x\n", r->regs[REGS_PC]);
+    printk("pc=%x\n", r->regs[REGS_PC]);
+    uint32_t mode = spsr_get() & 0b11111;
+    printk("mode = %b\n", mode);
+    // pc=0xb0cc
+    // mode = 10000
+    // eq_insert_with_priority pc=0xb0c8
+
     r->regs[REGS_PC] -= 4;
     cur_thread->regs = *r;
+    printk("eq_insert_with_priority pc=%x\n", cur_thread->regs.regs[REGS_PC]);
     eq_insert_with_priority(&runq, cur_thread);
     
     cur_thread = scheduler_thread;
@@ -156,6 +163,7 @@ static int pre_syscall_handler(regs_t *r) {
     // unsigned sysno = r->regs[0];
     // eq_append(&runq, cur_thread);
     // cur_thread->regs = *r;
+    // exit
     cur_thread = scheduler_thread;
     switchto(&scheduler_thread->regs);
     return 0;
@@ -225,22 +233,49 @@ pre_th_t *pre_cur_thread(void) {
 }
 
 void pre_yield(void) {
-    printk("thread=%d yielded\n", cur_thread->tid);
-    eq_append(&runq, cur_thread);
+    // cpsr_int_disable();
+    // uint32_t mode = spsr_get() & 0b11111;
+    // trace("mode = %b\n", mode);
+    trace("thread=%d yielded\n", cur_thread->tid);
+    // set current mode to user mode
+    // cpsr_set(cpsr_inherit(USER_MODE, cpsr_get()) & (~0b10000000));
+    // cur_thread->regs = *r;
+    // printk("append eq pc=%x\n", cur_thread->regs.regs[REGS_PC]);
+    // eq_append(&runq, cur_thread);
+    eq_insert_with_priority(&runq, cur_thread);
+    // switchto(&scheduler_thread->regs);
+    // return;
     pre_th_t* old = cur_thread;
     cur_thread = eq_pop(&runq);
-    printk("Switching from thread=%d to thread=%d\n", old->tid, cur_thread->tid);
-    // printk("pc=%x\n", cur_thread->regs.regs[REGS_PC]);
-    printk("switch to pc=%x\n", cur_thread->regs.regs[REGS_PC]);
+    // switchto(&cur_thread->regs);
+    
     if (cur_thread == old) {
         return;
     }
     else {
+        printk("Switching from thread=%d to thread=%d,pc=%x\n", old->tid, cur_thread->tid, cur_thread->regs.regs[REGS_PC]);
+        
+        // 0000aa80 <uart_can_putc>:
+        // aa80:	e92d4010 	push	{r4, lr}
+        // aa84:	e59f0010 	ldr	r0, [pc, #16]	; aa9c <uart_can_putc+0x1c>
+        // aa88:	ebfff567 	bl	802c <GET32>
+        // aa8c:	e3100020 	tst	r0, #32, 0
+
         uart_flush_tx();
         // mismatch_run(&cur_thread->regs);
         while (!uart_can_put8())
             ;
+        
+        // // printk("pc=%x\n", cur_thread->regs.regs[REGS_PC]);
+        // printk("old pc=%x\n", old->regs.regs[REGS_PC]);
+        // printk("switch to pc=%x\n", cur_thread->regs.regs[REGS_PC]);
+        // printk("mode_get(cpsr_get()) = %b\n", mode_get(cpsr_get()));
+        // switchto_cswitch(&scheduler_thread->regs, &cur_thread->regs);
         switchto(&cur_thread->regs);
+        // pre_cswitch(&old->regs, cur_thread->regs);
+        // &old->regs, 
+        // switchto(&cur_thread->regs);
+        // pre_cswitch(&old->regs, &cur_thread->regs);
     }
 }
 
