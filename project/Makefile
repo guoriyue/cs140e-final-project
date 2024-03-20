@@ -5,6 +5,7 @@ COMMON_SRC += switchto-asm.S
 COMMON_SRC += full-except-asm.S
 
 COMMON_SRC += preemptive-thread.c
+# COMMON_SRC += synch.c
 COMMON_SRC += preemptive-thread-asm.S
 
 COMMON_SRC += mini-step.c
@@ -25,7 +26,8 @@ START_ASM = staff-start.S
 
 # PROGS := preemptive-thread-test-2.c
 # PROGS := priority-test-1.c
-PROGS := priority-test-2.c
+# PROGS := priority-test-2.c
+PROGS := priority-test-3.c
 # PROGS := dependency-test-1.c
 # PROGS := ptest.c
 

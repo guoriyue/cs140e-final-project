@@ -5,13 +5,6 @@
 
 enum { stack_size = 8192 * 8 };
 
-typedef struct rq {
-    pre_th_t *head, *tail;
-} rq_t;
-
-#include "queue-ext-T.h"
-gen_priority_queue_T(eq, rq_t, head, tail, pre_th_t, next)
-
 static rq_t runq;
 static rq_t freeq;
 static pre_th_t * volatile cur_thread;
@@ -23,10 +16,13 @@ static unsigned tid = 1;
 static unsigned nalloced = 0;
 
 
-#undef trace
-#define trace(args...) do {                             \
-    printk("TRACE:%s:", __FUNCTION__); printk(args);    \
+enum { trace_p = 1};
+#define th_trace(args...) do {                          \
+    if(trace_p) {                                       \
+        trace(args);                                   \
+    }                                                   \
 } while(0)
+
 
 
 static void interrupt_handler(regs_t *r) {
@@ -40,23 +36,23 @@ static void interrupt_handler(regs_t *r) {
     
     // pre_th_t *prev_th = cur_thread;
     
-    trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, scheduler_thread->tid);
-    printk("pc=%x\n", r->regs[REGS_PC]);
+    th_trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, scheduler_thread->tid);
+    // printk("pc=%x\n", r->regs[REGS_PC]);
     uint32_t mode = spsr_get() & 0b11111;
-    printk("mode = %b\n", mode);
+    // printk("mode = %b\n", mode);
     // pc=0xb0cc
     // mode = 10000
     // eq_insert_with_priority pc=0xb0c8
 
     r->regs[REGS_PC] -= 4;
     cur_thread->regs = *r;
-    printk("eq_insert_with_priority pc=%x\n", cur_thread->regs.regs[REGS_PC]);
+    // printk("eq_insert_with_priority pc=%x\n", cur_thread->regs.regs[REGS_PC]);
     eq_insert_with_priority(&runq, cur_thread);
     
     cur_thread = scheduler_thread;
     
     switchto(&scheduler_thread->regs);
-    trace("Switching back to thread=%d\n", cur_thread->tid);
+    th_trace("Switching back to thread=%d\n", cur_thread->tid);
     // cswitch_from_exception(&scheduler_thread->regs);
 }
 
@@ -82,7 +78,7 @@ static inline regs_t regs_init(pre_th_t *p) {
 }
 
 pre_th_t *pre_fork(void (*fn)(void*), void *arg, uint32_t priority) {
-    trace("forking a fn.\n");
+    th_trace("forking a fn.\n");
     pre_th_t *th = pre_th_alloc();
     // kmalloc_aligned(stack_size, 8);
 
@@ -118,14 +114,14 @@ void scheduler(void) {
     // intr super mode
     // intr mode
     int first = 1;
-    trace("scheduler is called\n");
+    th_trace("scheduler is called\n");
     while (1) {
         if(eq_empty(&runq)) {
-            trace("No more thread to switch to\n");
+            th_trace("No more thread to switch to\n");
             return;
         }
         pre_th_t *th = eq_pop(&runq);
-        trace("switching from tid=%d,pc=%x to tid=%d,pc=%x,sp=%x\n", 
+        th_trace("switching from tid=%d,pc=%x to tid=%d,pc=%x,sp=%x\n", 
                 cur_thread->tid, 
                 cur_thread->regs.regs[REGS_PC],
                 th->tid,
@@ -133,7 +129,7 @@ void scheduler(void) {
                 th->regs.regs[REGS_SP]);
         // eq_append(&runq, cur_thread);
         cur_thread = th;
-        trace("switching from scheduler to tid=%d\n", cur_thread->tid);
+        th_trace("switching from scheduler to tid=%d\n", cur_thread->tid);
         // switchto(&cur_thread->regs);
 
         uart_flush_tx();
@@ -142,7 +138,7 @@ void scheduler(void) {
             ;
         // switchto(&cur_thread->regs);
         switchto_cswitch(&scheduler_thread->regs, &cur_thread->regs);
-        trace("switching back to scheduler\n");
+        th_trace("switching back to scheduler\n");
         
     }
 }
@@ -153,7 +149,7 @@ enum {
 };
 
 static int pre_syscall_handler(regs_t *r) {
-    trace("syscall handler is called.\n");
+    th_trace("syscall handler is called.\n");
     let th = cur_thread;
     assert(th);
     th->regs = *r;  // update the registers
@@ -169,12 +165,12 @@ static int pre_syscall_handler(regs_t *r) {
     return 0;
     // switch(sysno) {
     // case PRE_EXIT: 
-    //     trace("thread=%d exited with code=%d\n", 
+    //     th_trace("thread=%d exited with code=%d\n", 
     //         th->tid, r->regs[1]);
     //     pre_th_t *th = eq_pop(&runq);
 
     //     if (!th) {
-    //         trace("done with all threads\n");
+    //         th_trace("done with all threads\n");
     //         switchto(&scheduler_thread->regs);
     //     }
 
@@ -191,7 +187,7 @@ static int pre_syscall_handler(regs_t *r) {
 }
 
 void pre_run(void) {
-    trace("run\n");
+    th_trace("run\n");
     // switch_to_sys_mode();
 
     // timer_interrupt_init(0x1000);
@@ -224,7 +220,7 @@ void pre_run(void) {
 
     
     // switchto_cswitch(&start_regs, &scheduler_thread->regs);
-    trace("pre_run done with all threads\n");
+    th_trace("pre_run done with all threads\n");
 }
 
 // return pointer to the current thread.  
@@ -235,8 +231,8 @@ pre_th_t *pre_cur_thread(void) {
 void pre_yield(void) {
     // cpsr_int_disable();
     // uint32_t mode = spsr_get() & 0b11111;
-    // trace("mode = %b\n", mode);
-    trace("thread=%d yielded\n", cur_thread->tid);
+    // th_trace("mode = %b\n", mode);
+    // th_trace("thread=%d yielded\n", cur_thread->tid);
     // set current mode to user mode
     // cpsr_set(cpsr_inherit(USER_MODE, cpsr_get()) & (~0b10000000));
     // cur_thread->regs = *r;
@@ -253,7 +249,7 @@ void pre_yield(void) {
         return;
     }
     else {
-        printk("Switching from thread=%d to thread=%d,pc=%x\n", old->tid, cur_thread->tid, cur_thread->regs.regs[REGS_PC]);
+        // printk("Switching from thread=%d to thread=%d,pc=%x\n", old->tid, cur_thread->tid, cur_thread->regs.regs[REGS_PC]);
         
         // 0000aa80 <uart_can_putc>:
         // aa80:	e92d4010 	push	{r4, lr}
@@ -281,7 +277,7 @@ void pre_yield(void) {
 
 
 // static int pre_syscall_handler(regs_t *r) {
-//     trace("syscall: pc=%x\n", r->regs[REGS_PC]);
+//     th_trace("syscall: pc=%x\n", r->regs[REGS_PC]);
 //     uint32_t mode;
 
 //     mode = spsr_get() & 0b11111;
@@ -289,7 +285,7 @@ void pre_yield(void) {
 //     if(mode != USER_MODE && mode != SYS_MODE)
 //         panic("mode = %b: expected %b\n", mode, USER_MODE);
 //     else
-//         trace("success: spsr is at user/sys level\n");
+//         th_trace("success: spsr is at user/sys level\n");
 //     // dev_barrier();
 //     // unsigned pending = GET32(IRQ_basic_pending);
 //     // if((pending & RPI_BASIC_ARM_TIMER_IRQ) == 0)
@@ -299,7 +295,7 @@ void pre_yield(void) {
     
 //     // pre_th_t *prev_th = cur_thread;
 //     // eq_append(&runq, cur_thread);
-//     // trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, scheduler_thread->tid);
+//     // th_trace("Switching from thread=%d to thread=%d\n", cur_thread->tid, scheduler_thread->tid);
 //     // cur_thread->regs = *r;
     
 //     // cur_thread = scheduler_thread;
@@ -326,9 +322,9 @@ void int_vec_init(void *v) {
 
 
 void pre_init(void) {
-    trace("init func.\n");
+    th_trace("init func.\n");
     kmalloc_init();
-    // trace("init func.\n");
+    // th_trace("init func.\n");
     // kmalloc_init();
     timer_interrupt_init(0x10000);
     // system_enable_interrupts();
@@ -354,6 +350,68 @@ void pre_init(void) {
 }
 
 void pre_exit(void) {
-    printk("thread=%d exited\n", cur_thread->tid);
+    // printk("thread=%d exited\n", cur_thread->tid);
     switchto(&scheduler_thread->regs);
+}
+
+void thread_set_priority(int new_priority) {
+    cpsr_int_disable();
+    int32_t old_priority = cur_thread->priority;
+    cur_thread->priority = new_priority;
+    // if (!eq_empty(&cur_thread->donor_threads)) {
+    //     pre_th_t *highest_priority_donor_thread = eq_pop(&cur_thread->donor_threads);
+    //     if (highest_priority_donor_thread->priority > new_priority) {
+    //         cur_thread->priority = highest_priority_donor_thread->priority;
+    //     }
+    // }
+
+    thread_donate_priority(cur_thread);
+
+    if (old_priority > cur_thread->priority) {
+        pre_yield();
+    }
+    cpsr_int_enable();
+}
+
+void thread_donate_priority(pre_th_t *t) {
+    struct lock_t *l = t->wait_on_lock;
+    if (l->holder->priority >= t->priority) {
+        return;
+    }
+    l->holder->priority = t->priority;
+    thread_donate_priority(l->holder);
+}
+
+
+void lock_init (struct lock_t *lock)
+{
+    lock->holder = NULL;
+    lock->locked = 1;
+}
+
+void lock_acquire (struct lock_t *lock)
+{
+    cpsr_int_disable();
+    if (lock->locked == 0) {
+        lock->locked = 1;
+        lock->holder = pre_cur_thread();
+    } else {
+        printk("thread %d is waiting for the lock\n", pre_cur_thread()->tid);
+        eq_insert_with_priority(&lock->waiters, pre_cur_thread());
+        pre_yield();
+    }
+    cpsr_int_enable();
+}
+
+void lock_release (struct lock_t *lock)
+{
+    cpsr_int_disable();
+    if (eq_empty(&lock->waiters)) {
+        lock->locked = 0;
+        lock->holder = NULL;
+    } else {
+        pre_th_t *th = eq_pop(&lock->waiters);
+        lock->holder = th;
+    }
+    cpsr_int_enable();
 }

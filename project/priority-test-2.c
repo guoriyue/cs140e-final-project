@@ -8,7 +8,6 @@ void nop_1(void *);
 void mov_ident(void *);
 void small1(void *);
 void small2(void *);
-volatile lock_t l = 0; // Global lock variable
 
 volatile uint32_t shared_var = 0;
 void task1() {

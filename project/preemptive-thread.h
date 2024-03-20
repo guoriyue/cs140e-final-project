@@ -1,6 +1,5 @@
 #ifndef __PREEMPTIVE_THREAD_H__
 #define __EQUIV_THREAD_H__
-
 #include "switchto.h"
 
 typedef struct pre_th {
@@ -15,8 +14,27 @@ typedef struct pre_th {
     uint32_t stack_end;
 
     uint32_t priority;
+
+    struct lock_t* wait_on_lock;
 } pre_th_t;
 
+
+typedef struct rq {
+    pre_th_t *head, *tail;
+} rq_t;
+
+#include "queue-ext-T.h"
+gen_priority_queue_T(eq, rq_t, head, tail, pre_th_t, next)
+
+struct lock_t {
+    pre_th_t *holder; // the thread that holds the lock
+    rq_t waiters;
+    volatile int locked; // 0 if unlocked, 1 if locked
+};
+
+void lock_init (struct lock_t *lock);
+void lock_acquire (struct lock_t *lock);
+void lock_release (struct lock_t *lock);
 
 typedef void (*fn_t)(void*);
 
@@ -36,24 +54,7 @@ pre_th_t *pre_cur_thread(void);
 
 void pre_yield(void);
 
-// internal routine: 
-//  - save the current register values into <old_save_area>
-//  - load the values in <new_save_area> into the registers
-//  reutrn to the caller (which will now be different!)
-void pre_cswitch(regs_t *old, regs_t *new);
-
-typedef volatile uint32_t lock_t; // Define lock_t as a volatile uint32_t for atomic access
-
-// Corrected lock and unlock using your approach
-static inline void lock(lock_t *l) {
-    while(*l != 0) {
-        pre_yield(); // Wait for lock to be 0
-    }
-    *l = 1; // Acquire the lock
-}
-
-static inline void unlock(lock_t *l) {
-    *l = 0; // Release the lock
-}
+void thread_set_priority(int new_priority);
+void thread_donate_priority(pre_th_t *th);
 
 #endif
