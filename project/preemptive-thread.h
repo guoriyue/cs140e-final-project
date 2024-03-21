@@ -51,9 +51,28 @@ void sys_putc(uint8_t ch);
 
 
 // part 2: locks and semaphores
+// void system_enable_fiq(void);
+// void system_disable_fiq(void);
 
 
-int CAS(int *ptr,int oldvalue,int newvalue);
+static inline uint32_t system_enable_fiq(void) {
+    uint32_t cpsr = cpsr_get();
+    cpsr_set(cpsr & ~(1<<6));
+    return cpsr;
+}
+
+static inline uint32_t system_disable_fiq(void) {
+    uint32_t cpsr = cpsr_get();
+    cpsr_set(cpsr | (1<<6));
+    return cpsr;
+}
+
+
+int cas(int *ptr, int oldvalue, int newvalue);
+
+void spin_lock(volatile int* lock);
+void spin_unlock(volatile int* lock);
+
 void lock_(int *mutex);
 void unlock_(int *mutex);
 

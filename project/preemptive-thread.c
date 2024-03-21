@@ -145,7 +145,7 @@ void scheduler(void) {
 }
 
 enum {
-    PRE_EXIT = 0,
+    PRE_EXIT = 2,
     PRE_PUTC = 1
 };
 
@@ -237,7 +237,7 @@ void int_vec_init(void *v) {
 void pre_init(void) {
     th_trace("init func.\n");
     kmalloc_init();
-    timer_interrupt_init(0x100);
+    timer_interrupt_init(0x10000);
 
 
     extern uint32_t full_except_ints[];

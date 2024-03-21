@@ -7,7 +7,7 @@ COMMON_SRC += full-except-asm.S
 COMMON_SRC += preemptive-thread.c
 # COMMON_SRC += synch.c
 COMMON_SRC += preemptive-thread-asm.S
-
+COMMON_SRC += interrupts-asm.S
 COMMON_SRC += mini-step.c
 
 # COMMON_SRC += pth.c
