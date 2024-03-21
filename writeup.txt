@@ -1,0 +1,25 @@
+Our project implements a pre-emptive thread library based on timer interrupts. The library supports specification of the priority of each function being executed and a locking mechanism.
+
+Design:
+
+The following APIs are supported and exposed to user:
+
+1, pre_init()
+   This initializes the thread library.
+
+2, pre_fork(void (*fn)(void*), void *arg, uint32_t priority)
+   This prepares a function and its arguments for execution by the thread library. User can also specify the priority of the function to be scheduled. Once forked, the function stays on the running queue, awaiting execution.
+
+3, pre_run()
+   This function signals the start of execution of all the functions already forked into the thread library. 
+
+The idea is to keep a running queue that stores the states of all unfinished threads. The states are are saved in the form of 17 registers that describe a running thread. They are registers r0-r12, sp, lr, pc, and cpsr. These saved register values, encapsulated as regs_t, effectively serve as a state machine for a thread. When switching from one thread to another, a set of such registers is popped from the queue, and loaded into respective physical registers so that the execution of the thread being switched to is activated. The registers of the current running thread are in turn saved onto the queue. When a thread execution terminates, the next set of registers is popped and loaded, if there still remains any. 
+
+Thread switching is enabled by timer interrupts. Timer parameters are configured during initialization. To enable interrupt in each thread, we set the correponding cpsr when forking each thread. 
+
+To support priority, the running queue is implemented as a priority queue. When popping a set of registers from the queue, the states of the function that has the highest priority value (set during fork) is popped and executed.
+
+Challenges:
+
+The most significant difference between our pre-emptive thread lib and the cooperative thread lib in the lab is that yielding is now autonomous based on timer interrupts. During an interrupt, the processor mode is switched from user mode to supervisor mode. As such, during context switch, we could no longer simply save only the callee saved registers. Rather, the running queue needs to save all relevant registers so that the state profiles are consistent across mode switching. One bug that confused us was to enable interrupts in each thread so that thread switching works properly. To accomplish that, each CPSR register value of threads need to be set correctly, i.e. the 7-th bit needs to be cleared. 
+
