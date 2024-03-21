@@ -2,8 +2,9 @@
 #include "preemptive-thread.h"
 #include "timer-interrupt.h"
 
-volatile uint32_t shared_var = 0;
-// struct lock_t l; // Declare the lock.
+static uint32_t shared_var = 0;
+// struct lock l; // Declare the lock.
+int l = 0;
 
 void put_message(char* msg, uint32_t num){
     for (int i = 0; i < strlen(msg); i++){
@@ -29,34 +30,66 @@ void task1() {
     // lock_acquire(&l);
     // thread_set_priority(4);
     int p = 0;
-    for (int i = 0; i < 1000000; ++i) {
+    dmb();
+    dev_barrier();
+    cpsr_int_disable();
+
+    //  BCM2835 manual, section 7.5 , 112
+    dev_barrier();
+    PUT32(Disable_IRQs_1, 0xffffffff);
+    PUT32(Disable_IRQs_2, 0xffffffff);
+    dev_barrier();
+    // cpsr_int_disable();
+    for (int i = 0; i < 10000; ++i) {
         // lock_acquire(&l);   // Acquire the lock
+        // lock_(&l);
+        
         shared_var++;
         p++;
-        // printk("thread 1 shared_var = %d\n", shared_var);
+
+        // put_message("1", shared_var);
+        // unlock_(&l);
+        
+        printk("thread 1 shared_var = %d\n", shared_var);
         // lock_release(&l); // Release the lock
     }
+    cpsr_int_enable();
     // printk("task 1 current thread priority = %d\n", pre_cur_thread()->priority);
     // lock_release(&l);
-    put_message("task 1 p = ", p);
+    put_message("task 111111111111 p = ", p);
     // printk("task 1 p = %d\n", p);
 }
 
 void task2() {
     // lock_acquire(&l);
     int p = 0;
+    dmb();
+    dev_barrier();
+    // cpsr_int_disable();
+    cpsr_int_disable();
 
-    for (int i = 0; i < 1000000; ++i) {
+    //  BCM2835 manual, section 7.5 , 112
+    dev_barrier();
+    PUT32(Disable_IRQs_1, 0xffffffff);
+    PUT32(Disable_IRQs_2, 0xffffffff);
+    dev_barrier();
+    for (int i = 0; i < 10000; ++i) {
         // lock_acquire(&l);   // Acquire the lock
+        // lock_(&l);
+        
         shared_var--;
         p++;
-        // printk("thread 1 shared_var = %d\n", shared_var);
+        // put_message("2", shared_var);
+        // unlock_(&l);
+        
+        printk("thread 2 shared_var = %d\n", shared_var);
         // lock_release(&l); // Release the lock
     }
+    cpsr_int_enable();
     // printk("task 1 current thread priority = %d\n", pre_cur_thread()->priority);
     // lock_release(&l);
     // printk("task 2 p = %d\n", p);
-    put_message("task 1 p = ", p);
+    put_message("task 2222222222 p = ", p);
     // printk("shared_var = %d\n", shared_var);
     // printk("task 2 current thread priority = %d\n", pre_cur_thread()->priority);
     // lock_release(&l);

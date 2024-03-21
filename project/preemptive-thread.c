@@ -46,6 +46,7 @@ static void interrupt_handler(regs_t *r) {
 
     r->regs[REGS_PC] -= 4;
     cur_thread->regs = *r;
+    // print_regs(&cur_thread->regs);
     // printk("eq_insert_with_priority pc=%x\n", cur_thread->regs.regs[REGS_PC]);
     eq_insert_with_priority(&runq, cur_thread);
     
@@ -201,6 +202,7 @@ void pre_yield(void) {
     // return;
     pre_th_t* old = cur_thread;
     cur_thread = eq_pop(&runq);
+    // print_regs(&cur_thread->regs);
     // switchto(&cur_thread->regs);
     
     if (cur_thread == old) {
@@ -235,7 +237,7 @@ void int_vec_init(void *v) {
 void pre_init(void) {
     th_trace("init func.\n");
     kmalloc_init();
-    timer_interrupt_init(0x10000);
+    timer_interrupt_init(0x100);
 
 
     extern uint32_t full_except_ints[];
@@ -303,22 +305,45 @@ void sema_up(struct semaphore *sema)
 
 
 
+int CAS(int *ptr, int oldvalue, int newvalue)
+{
+    int temp = *ptr;
+    if(*ptr == oldvalue)
+        *ptr = newvalue;
+    return temp;
+}
+
+void lock_(int *mutex)
+{  
+    dev_barrier();
+    cpsr_int_disable();
+    // while(!CAS(mutex, 0, 1));
+}
+
+void unlock_(int *mutex)
+{
+    // *mutex = 0;
+    dev_barrier();
+    cpsr_int_enable();
+}
+
 // void lock_init (struct lock *l)
 // {
-//     lock->holder = NULL;
-//     lock->locked = 1;
+//     l->holder = NULL;
+//     l->semaphore.value = 1;
 // }
 
 // void lock_acquire (struct lock *l)
 // {
 //     cpsr_int_disable();
-//     if (lock->locked == 0) {
-//         lock->locked = 1;
-//         lock->holder = pre_cur_thread();
+//     if (l->semaphore.value > 0) {
+//         l->semaphore.value = 0;
+//         l->holder = pre_cur_thread();
 //     } else {
 //         printk("thread %d is waiting for the lock\n", pre_cur_thread()->tid);
-//         eq_insert_with_priority(&lock->waiters, pre_cur_thread());
-//         pre_yield();
+//         eq_insert_with_priority(&l->semaphore.waiters, pre_cur_thread());
+//         // pre_yield();
+//         // scheduler();
 //     }
 //     cpsr_int_enable();
 // }
@@ -326,12 +351,12 @@ void sema_up(struct semaphore *sema)
 // void lock_release (struct lock *l)
 // {
 //     cpsr_int_disable();
-//     if (eq_empty(&lock->waiters)) {
-//         lock->locked = 0;
-//         lock->holder = NULL;
+//     if (eq_empty(&l->semaphore.waiters)) {
+//         l->semaphore.value = 1;
+//         l->holder = NULL;
 //     } else {
-//         pre_th_t *th = eq_pop(&lock->waiters);
-//         lock->holder = th;
+//         pre_th_t *th = eq_pop(&l->semaphore.waiters);
+//         l->holder = th;
 //     }
 //     cpsr_int_enable();
 // }

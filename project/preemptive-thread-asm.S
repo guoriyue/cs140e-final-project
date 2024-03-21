@@ -24,3 +24,22 @@ MK_FN(sys_putc)
     swi 1
     pop {lr}
     bx lr
+
+MK_FN(cas_success)
+    mov r0, #1
+    pop {r4, pc}
+
+MK_FN(cas_fail)
+    mov r0, #0
+    pop {r4, pc}
+
+MK_FN(cas)
+    push {r4, lr}
+    ldrex r2, [r0]
+    cmp r2, r1
+    bne cas_fail
+    strex r3, r2, [r0]
+    cmp r3, #0
+    bne cas
+    bl cas_success
+

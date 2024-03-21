@@ -43,15 +43,21 @@ static pre_th_t *pre_th_alloc(void);
 void switch_to_sys_mode();
 
 pre_th_t *pre_cur_thread(void);
-
 void pre_yield(void);
-
+void print_regs(regs_t *r);
 
 void sys_exit(void); // need to be called by the thread when it exits, otherwise the thread will run forever
 void sys_putc(uint8_t ch);
 
 
 // part 2: locks and semaphores
+
+
+int CAS(int *ptr,int oldvalue,int newvalue);
+void lock_(int *mutex);
+void unlock_(int *mutex);
+
+
 struct semaphore 
 {
     int32_t value;             /* Current value. */
