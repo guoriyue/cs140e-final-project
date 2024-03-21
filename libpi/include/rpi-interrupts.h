@@ -63,7 +63,7 @@ void int_init_reg(void *int_vector_addr);
 
 // need to disable mmu if it's enabled.
 #define INT_UNHANDLED(msg,r) \
-    panic("called default handler: unhandled exception <%s> at PC=%x\n", msg,r)
+    panic("PPPPP called default handler: unhandled exception <%s> at PC=%x\n", msg,r)
 
 // can override these.
 void data_abort_vector(unsigned pc);

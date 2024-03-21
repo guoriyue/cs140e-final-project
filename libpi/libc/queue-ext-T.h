@@ -62,4 +62,79 @@
         q->head = q->tail = 0;                                          \
     }                                                                  
 
+
+
+
+#define gen_priority_queue_T(pfx, Q_T, head, tail, E_T, next)     \
+    /* iterator support. */                                             \
+    static inline E_T *pfx ## _start(Q_T *q) { return q->head; }   \
+    static inline E_T *pfx ## _next(E_T *e)  { return e->next; }   \
+                                                                        \
+    static int inline pfx ## _empty(Q_T *q)  {                          \
+        if(q->head)                                                \
+            return 0;                                                   \
+        demand(!q->tail, invalid Q);                               \
+        return 1;                                                       \
+    }                                                                   \
+                                                                        \
+    /* remove from front of list. */                                    \
+    static inline E_T *pfx ## _pop(Q_T *q) {                            \
+        demand(q, bad input);                                           \
+        E_T *e = q->head;                                          \
+        if(!e) {                                                        \
+            assert(pfx ## _empty(q));                                   \
+            return 0;                                                   \
+        }                                                               \
+        q->head= e->next;                                    \
+        if(!q->head)                                               \
+            q->tail= 0;                                           \
+        return e;                                                       \
+    }                                                                   \
+                                                                        \
+    /* insert at tail. (for FIFO) */                                    \
+    static inline void pfx ## _append(Q_T *q, E_T *e) {                 \
+        e->next = 0;                                                    \
+        if(!q->tail)                                                    \
+            q->head= q->tail = e;                                      \
+        else {                                                          \
+            q->tail->next = e;                                          \
+            q->tail= e;                                                \
+        }                                                               \
+    }                                                                   \
+                                                                        \
+    /* insert at head (for LIFO) */                                     \
+    static inline void pfx ## _push(Q_T *q, E_T *e) {                   \
+        e->next = q->head;                                              \
+        q->head = e;                                                    \
+        if(!q->tail)                                                    \
+            q->tail = e;                                                \
+        }                                                               \
+    static inline void pfx ## _insert_with_priority(Q_T *q, E_T *e) {   \
+        if (pfx ## _empty(q)) {                                         \
+            pfx ## _append(q, e);                                       \
+        } else {                                                        \
+            E_T *cur = q->head;                                         \
+            E_T *prev = 0;                                              \
+            while (cur) {                                               \
+                if (e->priority > cur->priority) {                      \
+                    if (prev) {                                         \
+                        prev->next = e;                                 \
+                    } else {                                            \
+                        q->head = e;                                    \
+                    }                                                   \
+                    e->next = cur;                                      \
+                    return;                                             \
+                } else {                                                \
+                    prev = cur;                                         \
+                    cur = cur->next;                                    \
+                }                                                       \
+            }                                                           \
+            pfx ## _append(q, e);                                       \
+        }                                                               \
+    }                                                                   \
+                                                                        \
+    static inline void pfx ## _init(Q_T *q) {                           \
+        q->head = q->tail = 0;                                          \
+    }  
+
 #endif

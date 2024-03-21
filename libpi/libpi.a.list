@@ -36467,7 +36467,7 @@ Disassembly of section .text:
   20:	e59f0010 	ldr	r0, [pc, #16]	; 38 <data_abort_vector+0x38>
   24:	ebfffffe 	bl	0 <printk>
   28:	ebfffffe 	bl	0 <clean_reboot>
-  2c:	00000078 	andeq	r0, r0, r8, ror r0
+  2c:	00000080 	andeq	r0, r0, r0, lsl #1
 	...
   38:	0000002c 	andeq	r0, r0, ip, lsr #32
 
@@ -36488,25 +36488,27 @@ Disassembly of section .rodata.str1.4:
   2c:	494e4150 	stmdbmi	lr, {r4, r6, r8, lr}^
   30:	73253a43 			; <UNDEFINED> instruction: 0x73253a43
   34:	3a73253a 	bcc	1cc9524 <data_abort_vector+0x1cc9524>
-  38:	633a6425 	teqvs	sl, #620756992	; 0x25000000
-  3c:	656c6c61 	strbvs	r6, [ip, #-3169]!	; 0xfffff39f
-  40:	65642064 	strbvs	r2, [r4, #-100]!	; 0xffffff9c
-  44:	6c756166 	ldfvse	f6, [r5], #-408	; 0xfffffe68
-  48:	61682074 	smcvs	33284	; 0x8204
-  4c:	656c646e 	strbvs	r6, [ip, #-1134]!	; 0xfffffb92
-  50:	75203a72 	strvc	r3, [r0, #-2674]!	; 0xfffff58e
-  54:	6e61686e 	cdpvs	8, 6, cr6, cr1, cr14, {3}
-  58:	64656c64 	strbtvs	r6, [r5], #-3172	; 0xfffff39c
-  5c:	63786520 	cmnvs	r8, #32, 10	; 0x8000000
-  60:	69747065 	ldmdbvs	r4!, {r0, r2, r5, r6, ip, sp, lr}^
-  64:	3c206e6f 	stccc	14, cr6, [r0], #-444	; 0xfffffe44
-  68:	203e7325 	eorscs	r7, lr, r5, lsr #6
-  6c:	50207461 	eorpl	r7, r0, r1, ror #8
-  70:	78253d43 	stmdavc	r5!, {r0, r1, r6, r8, sl, fp, ip, sp}
-  74:	00000a0a 	andeq	r0, r0, sl, lsl #20
-  78:	61746164 	cmnvs	r4, r4, ror #2
-  7c:	6f626120 	svcvs	0x00626120
-  80:	Address 0x0000000000000080 is out of bounds.
+  38:	503a6425 	eorspl	r6, sl, r5, lsr #8
+  3c:	50505050 	subspl	r5, r0, r0, asr r0
+  40:	6c616320 	stclvs	3, cr6, [r1], #-128	; 0xffffff80
+  44:	2064656c 	rsbcs	r6, r4, ip, ror #10
+  48:	61666564 	cmnvs	r6, r4, ror #10
+  4c:	20746c75 	rsbscs	r6, r4, r5, ror ip
+  50:	646e6168 	strbtvs	r6, [lr], #-360	; 0xfffffe98
+  54:	3a72656c 	bcc	1c9960c <data_abort_vector+0x1c9960c>
+  58:	686e7520 	stmdavs	lr!, {r5, r8, sl, ip, sp, lr}^
+  5c:	6c646e61 	stclvs	14, cr6, [r4], #-388	; 0xfffffe7c
+  60:	65206465 	strvs	r6, [r0, #-1125]!	; 0xfffffb9b
+  64:	70656378 	rsbvc	r6, r5, r8, ror r3
+  68:	6e6f6974 			; <UNDEFINED> instruction: 0x6e6f6974
+  6c:	73253c20 			; <UNDEFINED> instruction: 0x73253c20
+  70:	7461203e 	strbtvc	r2, [r1], #-62	; 0xffffffc2
+  74:	3d435020 	stclcc	0, cr5, [r3, #-128]	; 0xffffff80
+  78:	0a0a7825 	beq	29e114 <data_abort_vector+0x29e114>
+  7c:	00000000 	andeq	r0, r0, r0
+  80:	61746164 	cmnvs	r4, r4, ror #2
+  84:	6f626120 	svcvs	0x00626120
+  88:	Address 0x0000000000000088 is out of bounds.
 
 
 Disassembly of section .rodata:
@@ -37139,7 +37141,7 @@ Disassembly of section .debug_info:
  998:	01250000 			; <UNDEFINED> instruction: 0x01250000
  99c:	25320153 	ldrcs	r0, [r2, #-339]!	; 0xfffffead
  9a0:	05007d02 	streq	r7, [r0, #-3330]	; 0xfffff2fe
- 9a4:	00007803 	andeq	r7, r0, r3, lsl #16
+ 9a4:	00008003 	andeq	r8, r0, r3
  9a8:	7d022500 	cfstr32vc	mvfx2, [r2, #-0]
  9ac:	01f30304 	mvnseq	r0, r4, lsl #6
  9b0:	2c260050 	stccs	0, cr0, [r6], #-320	; 0xfffffec0
@@ -37894,7 +37896,7 @@ Disassembly of section .text:
   20:	e59f0010 	ldr	r0, [pc, #16]	; 38 <fast_interrupt_vector+0x38>
   24:	ebfffffe 	bl	0 <printk>
   28:	ebfffffe 	bl	0 <clean_reboot>
-  2c:	00000070 	andeq	r0, r0, r0, ror r0
+  2c:	00000078 	andeq	r0, r0, r8, ror r0
 	...
   38:	00000024 	andeq	r0, r0, r4, lsr #32
 
@@ -37910,7 +37912,7 @@ Disassembly of section .text:
   5c:	e59f0010 	ldr	r0, [pc, #16]	; 74 <fiq_vector+0x38>
   60:	ebfffffe 	bl	0 <printk>
   64:	ebfffffe 	bl	0 <clean_reboot>
-  68:	00000070 	andeq	r0, r0, r0, ror r0
+  68:	00000078 	andeq	r0, r0, r8, ror r0
   6c:	00000018 	andeq	r0, r0, r8, lsl r0
   70:	00000000 	andeq	r0, r0, r0
   74:	00000024 	andeq	r0, r0, r4, lsr #32
@@ -37930,23 +37932,25 @@ Disassembly of section .rodata.str1.4:
   24:	494e4150 	stmdbmi	lr, {r4, r6, r8, lr}^
   28:	73253a43 			; <UNDEFINED> instruction: 0x73253a43
   2c:	3a73253a 	bcc	1cc951c <fiq_vector+0x1cc94e0>
-  30:	633a6425 	teqvs	sl, #620756992	; 0x25000000
-  34:	656c6c61 	strbvs	r6, [ip, #-3169]!	; 0xfffff39f
-  38:	65642064 	strbvs	r2, [r4, #-100]!	; 0xffffff9c
-  3c:	6c756166 	ldfvse	f6, [r5], #-408	; 0xfffffe68
-  40:	61682074 	smcvs	33284	; 0x8204
-  44:	656c646e 	strbvs	r6, [ip, #-1134]!	; 0xfffffb92
-  48:	75203a72 	strvc	r3, [r0, #-2674]!	; 0xfffff58e
-  4c:	6e61686e 	cdpvs	8, 6, cr6, cr1, cr14, {3}
-  50:	64656c64 	strbtvs	r6, [r5], #-3172	; 0xfffff39c
-  54:	63786520 	cmnvs	r8, #32, 10	; 0x8000000
-  58:	69747065 	ldmdbvs	r4!, {r0, r2, r5, r6, ip, sp, lr}^
-  5c:	3c206e6f 	stccc	14, cr6, [r0], #-444	; 0xfffffe44
-  60:	203e7325 	eorscs	r7, lr, r5, lsr #6
-  64:	50207461 	eorpl	r7, r0, r1, ror #8
-  68:	78253d43 	stmdavc	r5!, {r0, r1, r6, r8, sl, fp, ip, sp}
-  6c:	00000a0a 	andeq	r0, r0, sl, lsl #20
-  70:	74736166 	ldrbtvc	r6, [r3], #-358	; 0xfffffe9a
+  30:	503a6425 	eorspl	r6, sl, r5, lsr #8
+  34:	50505050 	subspl	r5, r0, r0, asr r0
+  38:	6c616320 	stclvs	3, cr6, [r1], #-128	; 0xffffff80
+  3c:	2064656c 	rsbcs	r6, r4, ip, ror #10
+  40:	61666564 	cmnvs	r6, r4, ror #10
+  44:	20746c75 	rsbscs	r6, r4, r5, ror ip
+  48:	646e6168 	strbtvs	r6, [lr], #-360	; 0xfffffe98
+  4c:	3a72656c 	bcc	1c99604 <fiq_vector+0x1c995c8>
+  50:	686e7520 	stmdavs	lr!, {r5, r8, sl, ip, sp, lr}^
+  54:	6c646e61 	stclvs	14, cr6, [r4], #-388	; 0xfffffe7c
+  58:	65206465 	strvs	r6, [r0, #-1125]!	; 0xfffffb9b
+  5c:	70656378 	rsbvc	r6, r5, r8, ror r3
+  60:	6e6f6974 			; <UNDEFINED> instruction: 0x6e6f6974
+  64:	73253c20 			; <UNDEFINED> instruction: 0x73253c20
+  68:	7461203e 	strbtvc	r2, [r1], #-62	; 0xffffffc2
+  6c:	3d435020 	stclcc	0, cr5, [r3, #-128]	; 0xffffff80
+  70:	0a0a7825 	beq	29e10c <fiq_vector+0x29e0d0>
+  74:	00000000 	andeq	r0, r0, r0
+  78:	74736166 	ldrbtvc	r6, [r3], #-358	; 0xfffffe9a
 	...
 
 Disassembly of section .rodata:
@@ -38585,7 +38589,7 @@ Disassembly of section .debug_info:
  998:	01250000 			; <UNDEFINED> instruction: 0x01250000
  99c:	25330153 	ldrcs	r0, [r3, #-339]!	; 0xfffffead
  9a0:	05007d02 	streq	r7, [r0, #-3330]	; 0xfffff2fe
- 9a4:	00007003 	andeq	r7, r0, r3
+ 9a4:	00007803 	andeq	r7, r0, r3, lsl #16
  9a8:	7d022500 	cfstr32vc	mvfx2, [r2, #-0]
  9ac:	01f30304 	mvnseq	r0, r4, lsl #6
  9b0:	68260050 	stmdavs	r6!, {r4, r6}
@@ -38623,7 +38627,7 @@ Disassembly of section .debug_info:
  a30:	53012500 	movwpl	r2, #5376	; 0x1500
  a34:	02253201 	eoreq	r3, r5, #268435456	; 0x10000000
  a38:	0305007d 	movweq	r0, #20605	; 0x507d
- a3c:	00000070 	andeq	r0, r0, r0, ror r0
+ a3c:	00000078 	andeq	r0, r0, r8, ror r0
  a40:	047d0225 	ldrbteq	r0, [sp], #-549	; 0xfffffddb
  a44:	5001f303 	andpl	pc, r1, r3, lsl #6
  a48:	002c2600 	eoreq	r2, ip, r0, lsl #12
@@ -39397,7 +39401,7 @@ Disassembly of section .text:
   20:	e59f0010 	ldr	r0, [pc, #16]	; 38 <int_vector+0x38>
   24:	ebfffffe 	bl	0 <printk>
   28:	ebfffffe 	bl	0 <clean_reboot>
-  2c:	00000070 	andeq	r0, r0, r0, ror r0
+  2c:	00000078 	andeq	r0, r0, r8, ror r0
 	...
   38:	00000024 	andeq	r0, r0, r4, lsr #32
 
@@ -39416,25 +39420,27 @@ Disassembly of section .rodata.str1.4:
   24:	494e4150 	stmdbmi	lr, {r4, r6, r8, lr}^
   28:	73253a43 			; <UNDEFINED> instruction: 0x73253a43
   2c:	3a73253a 	bcc	1cc951c <int_vector+0x1cc951c>
-  30:	633a6425 	teqvs	sl, #620756992	; 0x25000000
-  34:	656c6c61 	strbvs	r6, [ip, #-3169]!	; 0xfffff39f
-  38:	65642064 	strbvs	r2, [r4, #-100]!	; 0xffffff9c
-  3c:	6c756166 	ldfvse	f6, [r5], #-408	; 0xfffffe68
-  40:	61682074 	smcvs	33284	; 0x8204
-  44:	656c646e 	strbvs	r6, [ip, #-1134]!	; 0xfffffb92
-  48:	75203a72 	strvc	r3, [r0, #-2674]!	; 0xfffff58e
-  4c:	6e61686e 	cdpvs	8, 6, cr6, cr1, cr14, {3}
-  50:	64656c64 	strbtvs	r6, [r5], #-3172	; 0xfffff39c
-  54:	63786520 	cmnvs	r8, #32, 10	; 0x8000000
-  58:	69747065 	ldmdbvs	r4!, {r0, r2, r5, r6, ip, sp, lr}^
-  5c:	3c206e6f 	stccc	14, cr6, [r0], #-444	; 0xfffffe44
-  60:	203e7325 	eorscs	r7, lr, r5, lsr #6
-  64:	50207461 	eorpl	r7, r0, r1, ror #8
-  68:	78253d43 	stmdavc	r5!, {r0, r1, r6, r8, sl, fp, ip, sp}
-  6c:	00000a0a 	andeq	r0, r0, sl, lsl #20
-  70:	65746e69 	ldrbvs	r6, [r4, #-3689]!	; 0xfffff197
-  74:	70757272 	rsbsvc	r7, r5, r2, ror r2
-  78:	Address 0x0000000000000078 is out of bounds.
+  30:	503a6425 	eorspl	r6, sl, r5, lsr #8
+  34:	50505050 	subspl	r5, r0, r0, asr r0
+  38:	6c616320 	stclvs	3, cr6, [r1], #-128	; 0xffffff80
+  3c:	2064656c 	rsbcs	r6, r4, ip, ror #10
+  40:	61666564 	cmnvs	r6, r4, ror #10
+  44:	20746c75 	rsbscs	r6, r4, r5, ror ip
+  48:	646e6168 	strbtvs	r6, [lr], #-360	; 0xfffffe98
+  4c:	3a72656c 	bcc	1c99604 <int_vector+0x1c99604>
+  50:	686e7520 	stmdavs	lr!, {r5, r8, sl, ip, sp, lr}^
+  54:	6c646e61 	stclvs	14, cr6, [r4], #-388	; 0xfffffe7c
+  58:	65206465 	strvs	r6, [r0, #-1125]!	; 0xfffffb9b
+  5c:	70656378 	rsbvc	r6, r5, r8, ror r3
+  60:	6e6f6974 			; <UNDEFINED> instruction: 0x6e6f6974
+  64:	73253c20 			; <UNDEFINED> instruction: 0x73253c20
+  68:	7461203e 	strbtvc	r2, [r1], #-62	; 0xffffffc2
+  6c:	3d435020 	stclcc	0, cr5, [r3, #-128]	; 0xffffff80
+  70:	0a0a7825 	beq	29e10c <int_vector+0x29e10c>
+  74:	00000000 	andeq	r0, r0, r0
+  78:	65746e69 	ldrbvs	r6, [r4, #-3689]!	; 0xfffff197
+  7c:	70757272 	rsbsvc	r7, r5, r2, ror r2
+  80:	Address 0x0000000000000080 is out of bounds.
 
 
 Disassembly of section .rodata:
@@ -40065,7 +40071,7 @@ Disassembly of section .debug_info:
  998:	01250000 			; <UNDEFINED> instruction: 0x01250000
  99c:	25330153 	ldrcs	r0, [r3, #-339]!	; 0xfffffead
  9a0:	05007d02 	streq	r7, [r0, #-3330]	; 0xfffff2fe
- 9a4:	00007003 	andeq	r7, r0, r3
+ 9a4:	00007803 	andeq	r7, r0, r3, lsl #16
  9a8:	7d022500 	cfstr32vc	mvfx2, [r2, #-0]
  9ac:	01f30304 	mvnseq	r0, r4, lsl #6
  9b0:	2c260050 	stccs	0, cr0, [r6], #-320	; 0xfffffec0
@@ -40813,7 +40819,7 @@ Disassembly of section .text:
   20:	e59f0010 	ldr	r0, [pc, #16]	; 38 <interrupt_vector+0x38>
   24:	ebfffffe 	bl	0 <printk>
   28:	ebfffffe 	bl	0 <clean_reboot>
-  2c:	00000074 	andeq	r0, r0, r4, ror r0
+  2c:	0000007c 	andeq	r0, r0, ip, ror r0
 	...
   38:	00000028 	andeq	r0, r0, r8, lsr #32
 
@@ -40833,25 +40839,27 @@ Disassembly of section .rodata.str1.4:
   28:	494e4150 	stmdbmi	lr, {r4, r6, r8, lr}^
   2c:	73253a43 			; <UNDEFINED> instruction: 0x73253a43
   30:	3a73253a 	bcc	1cc9520 <interrupt_vector+0x1cc9520>
-  34:	633a6425 	teqvs	sl, #620756992	; 0x25000000
-  38:	656c6c61 	strbvs	r6, [ip, #-3169]!	; 0xfffff39f
-  3c:	65642064 	strbvs	r2, [r4, #-100]!	; 0xffffff9c
-  40:	6c756166 	ldfvse	f6, [r5], #-408	; 0xfffffe68
-  44:	61682074 	smcvs	33284	; 0x8204
-  48:	656c646e 	strbvs	r6, [ip, #-1134]!	; 0xfffffb92
-  4c:	75203a72 	strvc	r3, [r0, #-2674]!	; 0xfffff58e
-  50:	6e61686e 	cdpvs	8, 6, cr6, cr1, cr14, {3}
-  54:	64656c64 	strbtvs	r6, [r5], #-3172	; 0xfffff39c
-  58:	63786520 	cmnvs	r8, #32, 10	; 0x8000000
-  5c:	69747065 	ldmdbvs	r4!, {r0, r2, r5, r6, ip, sp, lr}^
-  60:	3c206e6f 	stccc	14, cr6, [r0], #-444	; 0xfffffe44
-  64:	203e7325 	eorscs	r7, lr, r5, lsr #6
-  68:	50207461 	eorpl	r7, r0, r1, ror #8
-  6c:	78253d43 	stmdavc	r5!, {r0, r1, r6, r8, sl, fp, ip, sp}
-  70:	00000a0a 	andeq	r0, r0, sl, lsl #20
-  74:	65746e69 	ldrbvs	r6, [r4, #-3689]!	; 0xfffff197
-  78:	70757272 	rsbsvc	r7, r5, r2, ror r2
-  7c:	Address 0x000000000000007c is out of bounds.
+  34:	503a6425 	eorspl	r6, sl, r5, lsr #8
+  38:	50505050 	subspl	r5, r0, r0, asr r0
+  3c:	6c616320 	stclvs	3, cr6, [r1], #-128	; 0xffffff80
+  40:	2064656c 	rsbcs	r6, r4, ip, ror #10
+  44:	61666564 	cmnvs	r6, r4, ror #10
+  48:	20746c75 	rsbscs	r6, r4, r5, ror ip
+  4c:	646e6168 	strbtvs	r6, [lr], #-360	; 0xfffffe98
+  50:	3a72656c 	bcc	1c99608 <interrupt_vector+0x1c99608>
+  54:	686e7520 	stmdavs	lr!, {r5, r8, sl, ip, sp, lr}^
+  58:	6c646e61 	stclvs	14, cr6, [r4], #-388	; 0xfffffe7c
+  5c:	65206465 	strvs	r6, [r0, #-1125]!	; 0xfffffb9b
+  60:	70656378 	rsbvc	r6, r5, r8, ror r3
+  64:	6e6f6974 			; <UNDEFINED> instruction: 0x6e6f6974
+  68:	73253c20 			; <UNDEFINED> instruction: 0x73253c20
+  6c:	7461203e 	strbtvc	r2, [r1], #-62	; 0xffffffc2
+  70:	3d435020 	stclcc	0, cr5, [r3, #-128]	; 0xffffff80
+  74:	0a0a7825 	beq	29e110 <interrupt_vector+0x29e110>
+  78:	00000000 	andeq	r0, r0, r0
+  7c:	65746e69 	ldrbvs	r6, [r4, #-3689]!	; 0xfffff197
+  80:	70757272 	rsbsvc	r7, r5, r2, ror r2
+  84:	Address 0x0000000000000084 is out of bounds.
 
 
 Disassembly of section .rodata:
@@ -41483,7 +41491,7 @@ Disassembly of section .debug_info:
  998:	01250000 			; <UNDEFINED> instruction: 0x01250000
  99c:	25330153 	ldrcs	r0, [r3, #-339]!	; 0xfffffead
  9a0:	05007d02 	streq	r7, [r0, #-3330]	; 0xfffff2fe
- 9a4:	00007403 	andeq	r7, r0, r3, lsl #8
+ 9a4:	00007c03 	andeq	r7, r0, r3, lsl #24
  9a8:	7d022500 	cfstr32vc	mvfx2, [r2, #-0]
  9ac:	01f30304 	mvnseq	r0, r4, lsl #6
  9b0:	2c260050 	stccs	0, cr0, [r6], #-320	; 0xfffffec0
@@ -42236,7 +42244,7 @@ Disassembly of section .text:
   20:	e59f0010 	ldr	r0, [pc, #16]	; 38 <prefetch_abort_vector+0x38>
   24:	ebfffffe 	bl	0 <printk>
   28:	ebfffffe 	bl	0 <clean_reboot>
-  2c:	00000074 	andeq	r0, r0, r4, ror r0
+  2c:	0000007c 	andeq	r0, r0, ip, ror r0
 	...
   38:	00000028 	andeq	r0, r0, r8, lsr #32
 
@@ -42256,26 +42264,28 @@ Disassembly of section .rodata.str1.4:
   28:	494e4150 	stmdbmi	lr, {r4, r6, r8, lr}^
   2c:	73253a43 			; <UNDEFINED> instruction: 0x73253a43
   30:	3a73253a 	bcc	1cc9520 <prefetch_abort_vector+0x1cc9520>
-  34:	633a6425 	teqvs	sl, #620756992	; 0x25000000
-  38:	656c6c61 	strbvs	r6, [ip, #-3169]!	; 0xfffff39f
-  3c:	65642064 	strbvs	r2, [r4, #-100]!	; 0xffffff9c
-  40:	6c756166 	ldfvse	f6, [r5], #-408	; 0xfffffe68
-  44:	61682074 	smcvs	33284	; 0x8204
-  48:	656c646e 	strbvs	r6, [ip, #-1134]!	; 0xfffffb92
-  4c:	75203a72 	strvc	r3, [r0, #-2674]!	; 0xfffff58e
-  50:	6e61686e 	cdpvs	8, 6, cr6, cr1, cr14, {3}
-  54:	64656c64 	strbtvs	r6, [r5], #-3172	; 0xfffff39c
-  58:	63786520 	cmnvs	r8, #32, 10	; 0x8000000
-  5c:	69747065 	ldmdbvs	r4!, {r0, r2, r5, r6, ip, sp, lr}^
-  60:	3c206e6f 	stccc	14, cr6, [r0], #-444	; 0xfffffe44
-  64:	203e7325 	eorscs	r7, lr, r5, lsr #6
-  68:	50207461 	eorpl	r7, r0, r1, ror #8
-  6c:	78253d43 	stmdavc	r5!, {r0, r1, r6, r8, sl, fp, ip, sp}
-  70:	00000a0a 	andeq	r0, r0, sl, lsl #20
-  74:	66657270 			; <UNDEFINED> instruction: 0x66657270
-  78:	68637465 	stmdavs	r3!, {r0, r2, r5, r6, sl, ip, sp, lr}^
-  7c:	6f626120 	svcvs	0x00626120
-  80:	Address 0x0000000000000080 is out of bounds.
+  34:	503a6425 	eorspl	r6, sl, r5, lsr #8
+  38:	50505050 	subspl	r5, r0, r0, asr r0
+  3c:	6c616320 	stclvs	3, cr6, [r1], #-128	; 0xffffff80
+  40:	2064656c 	rsbcs	r6, r4, ip, ror #10
+  44:	61666564 	cmnvs	r6, r4, ror #10
+  48:	20746c75 	rsbscs	r6, r4, r5, ror ip
+  4c:	646e6168 	strbtvs	r6, [lr], #-360	; 0xfffffe98
+  50:	3a72656c 	bcc	1c99608 <prefetch_abort_vector+0x1c99608>
+  54:	686e7520 	stmdavs	lr!, {r5, r8, sl, ip, sp, lr}^
+  58:	6c646e61 	stclvs	14, cr6, [r4], #-388	; 0xfffffe7c
+  5c:	65206465 	strvs	r6, [r0, #-1125]!	; 0xfffffb9b
+  60:	70656378 	rsbvc	r6, r5, r8, ror r3
+  64:	6e6f6974 			; <UNDEFINED> instruction: 0x6e6f6974
+  68:	73253c20 			; <UNDEFINED> instruction: 0x73253c20
+  6c:	7461203e 	strbtvc	r2, [r1], #-62	; 0xffffffc2
+  70:	3d435020 	stclcc	0, cr5, [r3, #-128]	; 0xffffff80
+  74:	0a0a7825 	beq	29e110 <prefetch_abort_vector+0x29e110>
+  78:	00000000 	andeq	r0, r0, r0
+  7c:	66657270 			; <UNDEFINED> instruction: 0x66657270
+  80:	68637465 	stmdavs	r3!, {r0, r2, r5, r6, sl, ip, sp, lr}^
+  84:	6f626120 	svcvs	0x00626120
+  88:	Address 0x0000000000000088 is out of bounds.
 
 
 Disassembly of section .rodata:
@@ -42909,7 +42919,7 @@ Disassembly of section .debug_info:
  998:	01250000 			; <UNDEFINED> instruction: 0x01250000
  99c:	25320153 	ldrcs	r0, [r2, #-339]!	; 0xfffffead
  9a0:	05007d02 	streq	r7, [r0, #-3330]	; 0xfffff2fe
- 9a4:	00007403 	andeq	r7, r0, r3, lsl #8
+ 9a4:	00007c03 	andeq	r7, r0, r3, lsl #24
  9a8:	7d022500 	cfstr32vc	mvfx2, [r2, #-0]
  9ac:	01f30304 	mvnseq	r0, r4, lsl #6
  9b0:	2c260050 	stccs	0, cr0, [r6], #-320	; 0xfffffec0
@@ -43661,7 +43671,7 @@ Disassembly of section .text:
   20:	e59f0010 	ldr	r0, [pc, #16]	; 38 <reset_vector+0x38>
   24:	ebfffffe 	bl	0 <printk>
   28:	ebfffffe 	bl	0 <clean_reboot>
-  2c:	00000070 	andeq	r0, r0, r0, ror r0
+  2c:	00000078 	andeq	r0, r0, r8, ror r0
 	...
   38:	00000024 	andeq	r0, r0, r4, lsr #32
 
@@ -43680,24 +43690,26 @@ Disassembly of section .rodata.str1.4:
   24:	494e4150 	stmdbmi	lr, {r4, r6, r8, lr}^
   28:	73253a43 			; <UNDEFINED> instruction: 0x73253a43
   2c:	3a73253a 	bcc	1cc951c <reset_vector+0x1cc951c>
-  30:	633a6425 	teqvs	sl, #620756992	; 0x25000000
-  34:	656c6c61 	strbvs	r6, [ip, #-3169]!	; 0xfffff39f
-  38:	65642064 	strbvs	r2, [r4, #-100]!	; 0xffffff9c
-  3c:	6c756166 	ldfvse	f6, [r5], #-408	; 0xfffffe68
-  40:	61682074 	smcvs	33284	; 0x8204
-  44:	656c646e 	strbvs	r6, [ip, #-1134]!	; 0xfffffb92
-  48:	75203a72 	strvc	r3, [r0, #-2674]!	; 0xfffff58e
-  4c:	6e61686e 	cdpvs	8, 6, cr6, cr1, cr14, {3}
-  50:	64656c64 	strbtvs	r6, [r5], #-3172	; 0xfffff39c
-  54:	63786520 	cmnvs	r8, #32, 10	; 0x8000000
-  58:	69747065 	ldmdbvs	r4!, {r0, r2, r5, r6, ip, sp, lr}^
-  5c:	3c206e6f 	stccc	14, cr6, [r0], #-444	; 0xfffffe44
-  60:	203e7325 	eorscs	r7, lr, r5, lsr #6
-  64:	50207461 	eorpl	r7, r0, r1, ror #8
-  68:	78253d43 	stmdavc	r5!, {r0, r1, r6, r8, sl, fp, ip, sp}
-  6c:	00000a0a 	andeq	r0, r0, sl, lsl #20
-  70:	65736572 	ldrbvs	r6, [r3, #-1394]!	; 0xfffffa8e
-  74:	Address 0x0000000000000074 is out of bounds.
+  30:	503a6425 	eorspl	r6, sl, r5, lsr #8
+  34:	50505050 	subspl	r5, r0, r0, asr r0
+  38:	6c616320 	stclvs	3, cr6, [r1], #-128	; 0xffffff80
+  3c:	2064656c 	rsbcs	r6, r4, ip, ror #10
+  40:	61666564 	cmnvs	r6, r4, ror #10
+  44:	20746c75 	rsbscs	r6, r4, r5, ror ip
+  48:	646e6168 	strbtvs	r6, [lr], #-360	; 0xfffffe98
+  4c:	3a72656c 	bcc	1c99604 <reset_vector+0x1c99604>
+  50:	686e7520 	stmdavs	lr!, {r5, r8, sl, ip, sp, lr}^
+  54:	6c646e61 	stclvs	14, cr6, [r4], #-388	; 0xfffffe7c
+  58:	65206465 	strvs	r6, [r0, #-1125]!	; 0xfffffb9b
+  5c:	70656378 	rsbvc	r6, r5, r8, ror r3
+  60:	6e6f6974 			; <UNDEFINED> instruction: 0x6e6f6974
+  64:	73253c20 			; <UNDEFINED> instruction: 0x73253c20
+  68:	7461203e 	strbtvc	r2, [r1], #-62	; 0xffffffc2
+  6c:	3d435020 	stclcc	0, cr5, [r3, #-128]	; 0xffffff80
+  70:	0a0a7825 	beq	29e10c <reset_vector+0x29e10c>
+  74:	00000000 	andeq	r0, r0, r0
+  78:	65736572 	ldrbvs	r6, [r3, #-1394]!	; 0xfffffa8e
+  7c:	Address 0x000000000000007c is out of bounds.
 
 
 Disassembly of section .rodata:
@@ -44328,7 +44340,7 @@ Disassembly of section .debug_info:
  998:	01250000 			; <UNDEFINED> instruction: 0x01250000
  99c:	25320153 	ldrcs	r0, [r2, #-339]!	; 0xfffffead
  9a0:	05007d02 	streq	r7, [r0, #-3330]	; 0xfffff2fe
- 9a4:	00007003 	andeq	r7, r0, r3
+ 9a4:	00007803 	andeq	r7, r0, r3, lsl #16
  9a8:	7d022500 	cfstr32vc	mvfx2, [r2, #-0]
  9ac:	01f30304 	mvnseq	r0, r4, lsl #6
  9b0:	2c260050 	stccs	0, cr0, [r6], #-320	; 0xfffffec0
@@ -45078,7 +45090,7 @@ Disassembly of section .text:
   20:	e59f0010 	ldr	r0, [pc, #16]	; 38 <syscall_vector+0x38>
   24:	ebfffffe 	bl	0 <printk>
   28:	ebfffffe 	bl	0 <clean_reboot>
-  2c:	00000070 	andeq	r0, r0, r0, ror r0
+  2c:	00000078 	andeq	r0, r0, r8, ror r0
 	...
   38:	00000024 	andeq	r0, r0, r4, lsr #32
 
@@ -45097,23 +45109,25 @@ Disassembly of section .rodata.str1.4:
   24:	494e4150 	stmdbmi	lr, {r4, r6, r8, lr}^
   28:	73253a43 			; <UNDEFINED> instruction: 0x73253a43
   2c:	3a73253a 	bcc	1cc951c <syscall_vector+0x1cc951c>
-  30:	633a6425 	teqvs	sl, #620756992	; 0x25000000
-  34:	656c6c61 	strbvs	r6, [ip, #-3169]!	; 0xfffff39f
-  38:	65642064 	strbvs	r2, [r4, #-100]!	; 0xffffff9c
-  3c:	6c756166 	ldfvse	f6, [r5], #-408	; 0xfffffe68
-  40:	61682074 	smcvs	33284	; 0x8204
-  44:	656c646e 	strbvs	r6, [ip, #-1134]!	; 0xfffffb92
-  48:	75203a72 	strvc	r3, [r0, #-2674]!	; 0xfffff58e
-  4c:	6e61686e 	cdpvs	8, 6, cr6, cr1, cr14, {3}
-  50:	64656c64 	strbtvs	r6, [r5], #-3172	; 0xfffff39c
-  54:	63786520 	cmnvs	r8, #32, 10	; 0x8000000
-  58:	69747065 	ldmdbvs	r4!, {r0, r2, r5, r6, ip, sp, lr}^
-  5c:	3c206e6f 	stccc	14, cr6, [r0], #-444	; 0xfffffe44
-  60:	203e7325 	eorscs	r7, lr, r5, lsr #6
-  64:	50207461 	eorpl	r7, r0, r1, ror #8
-  68:	78253d43 	stmdavc	r5!, {r0, r1, r6, r8, sl, fp, ip, sp}
-  6c:	00000a0a 	andeq	r0, r0, sl, lsl #20
-  70:	00697773 	rsbeq	r7, r9, r3, ror r7
+  30:	503a6425 	eorspl	r6, sl, r5, lsr #8
+  34:	50505050 	subspl	r5, r0, r0, asr r0
+  38:	6c616320 	stclvs	3, cr6, [r1], #-128	; 0xffffff80
+  3c:	2064656c 	rsbcs	r6, r4, ip, ror #10
+  40:	61666564 	cmnvs	r6, r4, ror #10
+  44:	20746c75 	rsbscs	r6, r4, r5, ror ip
+  48:	646e6168 	strbtvs	r6, [lr], #-360	; 0xfffffe98
+  4c:	3a72656c 	bcc	1c99604 <syscall_vector+0x1c99604>
+  50:	686e7520 	stmdavs	lr!, {r5, r8, sl, ip, sp, lr}^
+  54:	6c646e61 	stclvs	14, cr6, [r4], #-388	; 0xfffffe7c
+  58:	65206465 	strvs	r6, [r0, #-1125]!	; 0xfffffb9b
+  5c:	70656378 	rsbvc	r6, r5, r8, ror r3
+  60:	6e6f6974 			; <UNDEFINED> instruction: 0x6e6f6974
+  64:	73253c20 			; <UNDEFINED> instruction: 0x73253c20
+  68:	7461203e 	strbtvc	r2, [r1], #-62	; 0xffffffc2
+  6c:	3d435020 	stclcc	0, cr5, [r3, #-128]	; 0xffffff80
+  70:	0a0a7825 	beq	29e10c <syscall_vector+0x29e10c>
+  74:	00000000 	andeq	r0, r0, r0
+  78:	00697773 	rsbeq	r7, r9, r3, ror r7
 
 Disassembly of section .rodata:
 
@@ -45744,7 +45758,7 @@ Disassembly of section .debug_info:
  998:	01250000 			; <UNDEFINED> instruction: 0x01250000
  99c:	25330153 	ldrcs	r0, [r3, #-339]!	; 0xfffffead
  9a0:	05007d02 	streq	r7, [r0, #-3330]	; 0xfffff2fe
- 9a4:	00007003 	andeq	r7, r0, r3
+ 9a4:	00007803 	andeq	r7, r0, r3, lsl #16
  9a8:	7d022500 	cfstr32vc	mvfx2, [r2, #-0]
  9ac:	01f30304 	mvnseq	r0, r4, lsl #6
  9b0:	2c260050 	stccs	0, cr0, [r6], #-320	; 0xfffffec0
@@ -46493,7 +46507,7 @@ Disassembly of section .text:
   20:	e59f0010 	ldr	r0, [pc, #16]	; 38 <undefined_instruction_vector+0x38>
   24:	ebfffffe 	bl	0 <printk>
   28:	ebfffffe 	bl	0 <clean_reboot>
-  2c:	0000007c 	andeq	r0, r0, ip, ror r0
+  2c:	00000084 	andeq	r0, r0, r4, lsl #1
 	...
   38:	00000030 	andeq	r0, r0, r0, lsr r0
 
@@ -46515,27 +46529,30 @@ Disassembly of section .rodata.str1.4:
   30:	494e4150 	stmdbmi	lr, {r4, r6, r8, lr}^
   34:	73253a43 			; <UNDEFINED> instruction: 0x73253a43
   38:	3a73253a 	bcc	1cc9528 <undefined_instruction_vector+0x1cc9528>
-  3c:	633a6425 	teqvs	sl, #620756992	; 0x25000000
-  40:	656c6c61 	strbvs	r6, [ip, #-3169]!	; 0xfffff39f
-  44:	65642064 	strbvs	r2, [r4, #-100]!	; 0xffffff9c
-  48:	6c756166 	ldfvse	f6, [r5], #-408	; 0xfffffe68
-  4c:	61682074 	smcvs	33284	; 0x8204
-  50:	656c646e 	strbvs	r6, [ip, #-1134]!	; 0xfffffb92
-  54:	75203a72 	strvc	r3, [r0, #-2674]!	; 0xfffff58e
-  58:	6e61686e 	cdpvs	8, 6, cr6, cr1, cr14, {3}
-  5c:	64656c64 	strbtvs	r6, [r5], #-3172	; 0xfffff39c
-  60:	63786520 	cmnvs	r8, #32, 10	; 0x8000000
-  64:	69747065 	ldmdbvs	r4!, {r0, r2, r5, r6, ip, sp, lr}^
-  68:	3c206e6f 	stccc	14, cr6, [r0], #-444	; 0xfffffe44
-  6c:	203e7325 	eorscs	r7, lr, r5, lsr #6
-  70:	50207461 	eorpl	r7, r0, r1, ror #8
-  74:	78253d43 	stmdavc	r5!, {r0, r1, r6, r8, sl, fp, ip, sp}
-  78:	00000a0a 	andeq	r0, r0, sl, lsl #20
-  7c:	65646e75 	strbvs	r6, [r4, #-3701]!	; 0xfffff18b
-  80:	656e6966 	strbvs	r6, [lr, #-2406]!	; 0xfffff69a
-  84:	6e692064 	cdpvs	0, 6, cr2, cr9, cr4, {3}
-  88:	Address 0x0000000000000088 is out of bounds.
-
+  3c:	503a6425 	eorspl	r6, sl, r5, lsr #8
+  40:	50505050 	subspl	r5, r0, r0, asr r0
+  44:	6c616320 	stclvs	3, cr6, [r1], #-128	; 0xffffff80
+  48:	2064656c 	rsbcs	r6, r4, ip, ror #10
+  4c:	61666564 	cmnvs	r6, r4, ror #10
+  50:	20746c75 	rsbscs	r6, r4, r5, ror ip
+  54:	646e6168 	strbtvs	r6, [lr], #-360	; 0xfffffe98
+  58:	3a72656c 	bcc	1c99610 <undefined_instruction_vector+0x1c99610>
+  5c:	686e7520 	stmdavs	lr!, {r5, r8, sl, ip, sp, lr}^
+  60:	6c646e61 	stclvs	14, cr6, [r4], #-388	; 0xfffffe7c
+  64:	65206465 	strvs	r6, [r0, #-1125]!	; 0xfffffb9b
+  68:	70656378 	rsbvc	r6, r5, r8, ror r3
+  6c:	6e6f6974 			; <UNDEFINED> instruction: 0x6e6f6974
+  70:	73253c20 			; <UNDEFINED> instruction: 0x73253c20
+  74:	7461203e 	strbtvc	r2, [r1], #-62	; 0xffffffc2
+  78:	3d435020 	stclcc	0, cr5, [r3, #-128]	; 0xffffff80
+  7c:	0a0a7825 	beq	29e118 <undefined_instruction_vector+0x29e118>
+  80:	00000000 	andeq	r0, r0, r0
+  84:	50505050 	subspl	r5, r0, r0, asr r0
+  88:	6e752050 	mrcvs	0, 3, r2, cr5, cr0, {2}
+  8c:	69666564 	stmdbvs	r6!, {r2, r5, r6, r8, sl, sp, lr}^
+  90:	2064656e 	rsbcs	r6, r4, lr, ror #10
+  94:	74736e69 	ldrbtvc	r6, [r3], #-3689	; 0xfffff197
+	...
 
 Disassembly of section .rodata:
 
@@ -47169,7 +47186,7 @@ Disassembly of section .debug_info:
  998:	01250000 			; <UNDEFINED> instruction: 0x01250000
  99c:	25320153 	ldrcs	r0, [r2, #-339]!	; 0xfffffead
  9a0:	05007d02 	streq	r7, [r0, #-3330]	; 0xfffff2fe
- 9a4:	00007c03 	andeq	r7, r0, r3, lsl #24
+ 9a4:	00008403 	andeq	r8, r0, r3, lsl #8
  9a8:	7d022500 	cfstr32vc	mvfx2, [r2, #-0]
  9ac:	01f30304 	mvnseq	r0, r4, lsl #6
  9b0:	2c260050 	stccs	0, cr0, [r6], #-320	; 0xfffffec0
