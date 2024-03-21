@@ -83,7 +83,7 @@ Tests:
    Test priority scheduling (with yield and preemption).
 
    priority-test-3:
-   Test lock.
+   Same priority. Test lock.
 
    equiv-test-1:
    Check hash of registers when thread exits.
