@@ -2,7 +2,8 @@
 #include "timer-interrupt.h"
 #include "preemptive-thread.h"
 #include "full-except.h"
-
+#include "mini-step.h"
+#include "fast-hash32.h"
 enum { stack_size = 8192 * 8 };
 
 static rq_t runq;
@@ -78,11 +79,11 @@ static inline regs_t regs_init(pre_th_t *p) {
     return regs;
 }
 
-pre_th_t *pre_fork(void (*fn)(void*), void *arg, uint32_t priority) {
+pre_th_t *pre_fork(void (*fn)(void*), void *arg, uint32_t priority, uint32_t expected_hash) {
     th_trace("forking a fn.\n");
     pre_th_t *th = pre_th_alloc();
     // kmalloc_aligned(stack_size, 8);
-
+    th->expected_hash = expected_hash;
     th->fn = (uint32_t)fn;
     th->arg = (uint32_t)arg;
 
@@ -145,7 +146,7 @@ void scheduler(void) {
 }
 
 enum {
-    PRE_EXIT = 2,
+    PRE_EXIT = 0,
     PRE_PUTC = 1
 };
 
@@ -154,12 +155,63 @@ void print_regs(regs_t *r){
         printk("r%d=%x\n", i, r->regs[i]);
     }
 }
+
+
+// just print out the pc and instruction count.
+static void equiv_hash_handler(void *data, step_fault_t *s) {
+    printk("equiv_hash_handler: pc=%x, inst_cnt=%d\n", s->regs->regs[15], cur_thread->inst_cnt);
+    gcc_mb();
+    let th = cur_thread;
+    assert(th);
+    th->regs = *s->regs;
+    th->inst_cnt++;
+
+    let regs = s->regs->regs;
+    uint32_t pc = regs[15];
+
+    th->reg_hash = fast_hash_inc32(&th->regs, sizeof th->regs, th->reg_hash);
+
+    gcc_mb();
+    // equiv_schedule();
+}
+
+// re-initialize and put back on the run queue
+void equiv_refresh(pre_th_t *th) {
+    // th->regs = equiv_regs_init(th); 
+    th->regs = regs_init(th);
+    // check_sp(th);
+    th->inst_cnt = 0;
+    th->reg_hash = 0;
+    // eq_push(&equiv_runq, th);
+    eq_insert_with_priority(&runq, th);
+}
+
+
+
 static int pre_syscall_handler(regs_t *r) {
     th_trace("syscall handler is called.\n");
     uart_flush_tx();
     uint32_t sysno = r->regs[0];
     switch (sysno) {
         case PRE_EXIT:
+            cur_thread->reg_hash = fast_hash_inc32(&cur_thread->regs, sizeof cur_thread->regs, cur_thread->reg_hash);
+            if(!cur_thread->expected_hash)
+                cur_thread->expected_hash = cur_thread->reg_hash;
+            else if(cur_thread->expected_hash) {
+                let exp = cur_thread->expected_hash;
+                let got = cur_thread->reg_hash;
+                // printk("EXIT HASH: tid=%d: expected hash=%x, have=%x\n", 
+                //     cur_thread->tid, exp, got);
+                if(exp == got) {
+                    trace("EXIT HASH MATCH: tid=%d: hash=%x\n", 
+                        cur_thread->tid, exp, got);
+                } else {
+                    panic("MISMATCH ERROR: tid=%d: expected hash=%x, have=%x\n", 
+                        cur_thread->tid, exp, got);
+                }
+            }
+
+
             cur_thread = scheduler_thread;
             switchto(&scheduler_thread->regs);
         case PRE_PUTC:
@@ -237,6 +289,7 @@ void int_vec_init(void *v) {
 void pre_init(void) {
     th_trace("init func.\n");
     kmalloc_init();
+    // mini_step_init(equiv_hash_handler, 0);
     timer_interrupt_init(0x10000);
 
 
@@ -246,6 +299,7 @@ void pre_init(void) {
     
     full_except_set_interrupt(interrupt_handler);
     full_except_set_syscall(pre_syscall_handler);
+    // pre_mini_step_init(equiv_hash_handler, 0);
 }
 
 void pre_exit(void) {
@@ -268,50 +322,12 @@ void spin_unlock(spin_lock_t * lock) {
 }
 
 
-
-// void lock_init (struct lock *l)
-// {
-//     l->holder = NULL;
-//     l->semaphore.value = 1;
-// }
-
-// void lock_acquire (struct lock *l)
-// {
-//     cpsr_int_disable();
-//     if (l->semaphore.value > 0) {
-//         l->semaphore.value = 0;
-//         l->holder = pre_cur_thread();
-//     } else {
-//         printk("thread %d is waiting for the lock\n", pre_cur_thread()->tid);
-//         eq_insert_with_priority(&l->semaphore.waiters, pre_cur_thread());
-//         // pre_yield();
-//         // scheduler();
-//     }
-//     cpsr_int_enable();
-// }
-
-// void lock_release (struct lock *l)
-// {
-//     cpsr_int_disable();
-//     if (eq_empty(&l->semaphore.waiters)) {
-//         l->semaphore.value = 1;
-//         l->holder = NULL;
-//     } else {
-//         pre_th_t *th = eq_pop(&l->semaphore.waiters);
-//         l->holder = th;
-//     }
-//     cpsr_int_enable();
-// }
-
 // without donation
 // arm atomics for sync
 // better lock (disable interrupts bad performance)
 // atomic compare and swap
 // ll sc lock
 // reset priority and donation
-
-
-
 
 
 // void thread_set_priority(int new_priority) {

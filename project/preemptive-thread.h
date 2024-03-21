@@ -16,7 +16,12 @@ typedef struct pre_th {
 
     uint32_t priority;
 
-    struct lock_t* wait_on_lock; // the lock that the thread is waiting on
+    // if non-zero: the hash we expect to get 
+    uint32_t expected_hash;
+
+    // the current cumulative hash
+    uint32_t reg_hash;
+    uint32_t inst_cnt;
 } pre_th_t;
 
 
@@ -34,7 +39,7 @@ void pre_init(void);
 
 void pre_run(void);
 
-pre_th_t *pre_fork(void (*fn)(void*), void *arg, uint32_t priority);
+pre_th_t *pre_fork(void (*fn)(void*), void *arg, uint32_t priority, uint32_t expected_hash);
 
 void pre_exit(void);
 
@@ -48,7 +53,7 @@ void print_regs(regs_t *r);
 
 void sys_exit(void); // need to be called by the thread when it exits, otherwise the thread will run forever
 void sys_putc(uint8_t ch);
-
+void equiv_refresh(pre_th_t *th);
 
 // part 2: locks and semaphores
 // void system_enable_fiq(void);

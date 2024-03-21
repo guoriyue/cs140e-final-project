@@ -63,7 +63,7 @@ void task1() {
     // cpsr_int_enable();
     // set_all_interrupts(prev_intr_state);
     // system_enable_fiq();
-    sys_exit();
+    // sys_exit();
     // printk("task 1 current thread priority = %d\n", pre_cur_thread()->priority);
     // lock_release(&l);
     // 
@@ -108,7 +108,7 @@ void task2() {
     // printk("shared_var = %d\n", shared_var);
     // printk("task 2 current thread priority = %d\n", pre_cur_thread()->priority);
     // lock_release(&l);
-    sys_exit();
+    // sys_exit();
 }
 
 

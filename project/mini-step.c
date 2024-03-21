@@ -145,6 +145,22 @@ void mini_step_init(step_handler_t h, void *data) {
     assert(!cp14_bcr0_is_enabled());
 }
 
+
+void pre_mini_step_init(step_handler_t h, void *data) {
+    assert(h);
+    step_handler_data = data;
+    step_handler = h;
+    full_except_set_prefetch(mismatch_fault);
+
+    // printk("here here\n");
+    // // 2. enable the debug coprocessor.
+    cp14_enable();
+
+    // just started, should not be enabled.
+    assert(!cp14_bcr0_is_enabled());
+    assert(!cp14_bcr0_is_enabled());
+}
+
 // run <fn> with argument <arg> in single step mode.
 uint32_t mini_step_run(void (*fn)(void*), void *arg) {
     uint32_t pc = (uint32_t)fn;
