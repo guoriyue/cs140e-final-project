@@ -9,7 +9,8 @@ COMMON_SRC += preemptive-thread.c
 COMMON_SRC += preemptive-thread-asm.S
 COMMON_SRC += interrupts-asm.S
 COMMON_SRC += mini-step.c
-
+COMMON_SRC += mmu.c
+COMMON_SRC += your-mmu-asm.S
 # COMMON_SRC += pth.c
 # COMMON_SRC += pth.S
 

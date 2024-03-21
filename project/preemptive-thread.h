@@ -68,39 +68,23 @@ static inline uint32_t system_disable_fiq(void) {
 }
 
 
-int cas(int *ptr, int oldvalue, int newvalue);
 
-void spin_lock(volatile int* lock);
-void spin_unlock(volatile int* lock);
+typedef int spin_lock_t;
 
-void lock_(int *mutex);
-void unlock_(int *mutex);
+int try_lock(spin_lock_t *lock);
 
-
-struct semaphore 
-{
-    int32_t value;             /* Current value. */
-    rq_t waiters;        /* List of waiting threads. */
-};
-
-void sema_init (struct semaphore *, unsigned value);
-void sema_down (struct semaphore *);
-int sema_try_down (struct semaphore *);
-void sema_up (struct semaphore *);
-void sema_self_test (void);
+void spin_init(spin_lock_t * lock);
 
 
 
-struct lock {
-    pre_th_t *holder; // the thread that holds the lock
-    struct semaphore semaphore;
-};
+void spin_lock(spin_lock_t * lock);
 
-void lock_init (struct lock *l);
-void lock_acquire (struct lock *l);
-void lock_release (struct lock *l);
-int lock_try_acquire (struct lock *l);
-int lock_held_by_current_thread (const struct lock *l);
+
+void spin_unlock(spin_lock_t * lock);
+
+
+
+
 
 
 

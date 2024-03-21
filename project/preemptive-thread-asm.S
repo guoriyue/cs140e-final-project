@@ -36,35 +36,27 @@ MK_FN(cas_fail)
 @ int cas(int *ptr, int oldvalue, int newvalue);
 MK_FN(cas)
     push {lr}
-    ldrex r3, [r0]
+    ldr r3, [r0]
     cmp r3, r1
     @ if (r3 != r1) return 0;
     bne cas_fail
-    strex r3, r2, [r0]
+    @ ex
+    str r2, [r0]
+    mov r3, #0
+    @ strex r3, r2, [r0]
     cmp r3, #0 @ success or failure
     bne cas @ 1 means failure
     bl cas_success @ 0 means success
 
-MK_FN(spin_lock)
-	mov	r2, #1
-1:
-	@ ldrex	r1, [r0]
-    ldr	r1, [r0]
-	cmp	r1, #0
-	wfene
-	strexeq	r1, r2, [r0]
-	cmpeq	r1, #0
-	bne	1b
-	bl dmb
-	bx	lr
 
-MK_FN(spin_unlock)
-	mov	r1, #0
-	bl dmb
-	str	r1, [r0]
-	sev
-	bx	lr
-
+// This function takes a pointer to a lock variable and uses atomic operations to aqcuire the lock.
+// Returns 0 if the lock was not acquired and 1 if it was.
+MK_FN(try_lock)
+    mov     r1, #0
+    swp     r2, r1, [r0]    // stores the value in r1 into the address in r0, and stores the value at the address in r0 into r2
+    mov     r0, r2
+    blx     lr 
+    
 @ .globl system_enable_fiq
 @ system_enable_fiq:
 @     mrs r0,cpsr         @ move process status register (PSR) to r0

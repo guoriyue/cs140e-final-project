@@ -257,75 +257,17 @@ void pre_exit(void) {
 void thread_unblock(pre_th_t *th) {
     eq_insert_with_priority(&runq, th);
 }
-
-
-
-
-
-
-void sema_init(struct semaphore *sema, unsigned value) 
-{
-  sema->value = value;
+void spin_init(spin_lock_t * lock) {
+    *lock = 1;
 }
-
-void sema_down(struct semaphore *sema) 
-{
-  cpsr_int_disable();
-  if (sema->value == 0) {
-    eq_insert_with_priority(&sema->waiters, pre_cur_thread());
-    pre_yield();
-  }
-  sema->value--;
-  cpsr_int_enable();
+void spin_lock(spin_lock_t * lock) {
+    while (!try_lock(lock));
 }
-
-int sema_try_down(struct semaphore *sema) 
-{
-  cpsr_int_disable();
-  if (sema->value > 0) {
-    sema->value--;
-    cpsr_int_enable();
-    return 1;
-  }
-  cpsr_int_enable();
-  return 0;
-}
-
-void sema_up(struct semaphore *sema) 
-{
-  cpsr_int_disable();
-  if (!eq_empty(&sema->waiters)) {
-    pre_th_t *th = eq_pop(&sema->waiters);
-    eq_insert_with_priority(&runq, th);
-  }
-  sema->value++;
-  cpsr_int_enable();
+void spin_unlock(spin_lock_t * lock) {
+    *lock = 1;
 }
 
 
-
-
-int CAS(int *ptr, int oldvalue, int newvalue)
-{
-    int temp = *ptr;
-    if(*ptr == oldvalue)
-        *ptr = newvalue;
-    return temp;
-}
-
-void lock_(int *mutex)
-{  
-    dev_barrier();
-    cpsr_int_disable();
-    // while(!CAS(mutex, 0, 1));
-}
-
-void unlock_(int *mutex)
-{
-    // *mutex = 0;
-    dev_barrier();
-    cpsr_int_enable();
-}
 
 // void lock_init (struct lock *l)
 // {
