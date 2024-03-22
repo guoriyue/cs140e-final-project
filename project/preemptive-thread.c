@@ -12,12 +12,12 @@ static pre_th_t * volatile cur_thread;
 static pre_th_t *scheduler_thread;
 static regs_t start_regs;
 
-
+static int equiv = 0;
 static unsigned tid = 1;
 static unsigned nalloced = 0;
 
 
-enum { trace_p = 0};
+enum { trace_p = 1};
 #define th_trace(args...) do {                          \
     if(trace_p) {                                       \
         trace(args);                                   \
@@ -139,7 +139,18 @@ void scheduler(void) {
         while (!uart_can_put8())
             ;
         // switchto(&cur_thread->regs);
+        if (equiv) {
+            mismatch_on();
+        }
+        // switch to <r> save values in <start_regs>
+        // switchto_cswitch(&start_regs, &r);
+        // mistmatch is off.
+    
+        
         switchto_cswitch(&scheduler_thread->regs, &cur_thread->regs);
+        if (equiv) {
+            mismatch_off();
+        }
         th_trace("switching back to scheduler\n");
         
     }
@@ -159,7 +170,7 @@ void print_regs(regs_t *r){
 
 // just print out the pc and instruction count.
 static void equiv_hash_handler(void *data, step_fault_t *s) {
-    printk("equiv_hash_handler: pc=%x, inst_cnt=%d\n", s->regs->regs[15], cur_thread->inst_cnt);
+    // printk("equiv_hash_handler: pc=%x, inst_cnt=%d\n", s->regs->regs[15], cur_thread->inst_cnt);
     gcc_mb();
     let th = cur_thread;
     assert(th);
@@ -168,8 +179,9 @@ static void equiv_hash_handler(void *data, step_fault_t *s) {
 
     let regs = s->regs->regs;
     uint32_t pc = regs[15];
-
+    th->regs.regs[15] = 0;
     th->reg_hash = fast_hash_inc32(&th->regs, sizeof th->regs, th->reg_hash);
+    th->regs.regs[15] = pc;
 
     gcc_mb();
     // equiv_schedule();
@@ -194,20 +206,22 @@ static int pre_syscall_handler(regs_t *r) {
     uint32_t sysno = r->regs[0];
     switch (sysno) {
         case PRE_EXIT:
-            cur_thread->reg_hash = fast_hash_inc32(&cur_thread->regs, sizeof cur_thread->regs, cur_thread->reg_hash);
-            if(!cur_thread->expected_hash)
-                cur_thread->expected_hash = cur_thread->reg_hash;
-            else if(cur_thread->expected_hash) {
-                let exp = cur_thread->expected_hash;
-                let got = cur_thread->reg_hash;
-                // printk("EXIT HASH: tid=%d: expected hash=%x, have=%x\n", 
-                //     cur_thread->tid, exp, got);
-                if(exp == got) {
-                    trace("EXIT HASH MATCH: tid=%d: hash=%x\n", 
-                        cur_thread->tid, exp, got);
-                } else {
-                    panic("MISMATCH ERROR: tid=%d: expected hash=%x, have=%x\n", 
-                        cur_thread->tid, exp, got);
+            // cur_thread->reg_hash = fast_hash_inc32(&cur_thread->regs, sizeof cur_thread->regs, cur_thread->reg_hash);
+            if (equiv) {
+                if(!cur_thread->expected_hash)
+                    cur_thread->expected_hash = cur_thread->reg_hash;
+                else if(cur_thread->expected_hash) {
+                    let exp = cur_thread->expected_hash;
+                    let got = cur_thread->reg_hash;
+                    // printk("EXIT HASH: tid=%d: expected hash=%x, have=%x\n", 
+                    //     cur_thread->tid, exp, got);
+                    if(exp == got) {
+                        trace("EXIT HASH MATCH: tid=%d: hash=%x\n", 
+                            cur_thread->tid, exp, got);
+                    } else {
+                        panic("MISMATCH ERROR: tid=%d: expected hash=%x, have=%x\n", 
+                            cur_thread->tid, exp, got);
+                    }
                 }
             }
 
@@ -299,7 +313,9 @@ void pre_init(void) {
     
     full_except_set_interrupt(interrupt_handler);
     full_except_set_syscall(pre_syscall_handler);
-    // pre_mini_step_init(equiv_hash_handler, 0);
+    if (equiv) {
+        pre_mini_step_init(equiv_hash_handler, 0);
+    }
 }
 
 void pre_exit(void) {

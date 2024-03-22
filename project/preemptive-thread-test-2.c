@@ -18,7 +18,7 @@ static void thread_code(void *arg) {
 
     // check tid
     unsigned tid = pre_cur_thread()->tid;
-	trace("in thread tid=%d, with x=%d\n", tid, *x);
+	// trace("in thread tid=%d, with x=%d\n", tid, *x);
     // debug("in thread tid=%d, with x=%d\n", tid, *x);
     demand(pre_cur_thread()->tid == *x+1, 
                 "expected %d, have %d\n", tid,*x+1);
@@ -31,7 +31,7 @@ static void thread_code(void *arg) {
     // pre_yield();
     // check exit
     // pre_exit(0);
-    trace("thread %d exiting\n", tid);
+    // trace("thread %d exiting\n", tid);
 }
 
 void notmain() {
@@ -47,7 +47,7 @@ void notmain() {
 	for(int i = 0; i < n; i++)  {
         int *x = kmalloc(sizeof *x);
         sum += *x = i;
-		pre_fork(thread_code, x, 0);
+		pre_fork(thread_code, x, 0, 0);
     }
 	pre_run();
 

@@ -152,9 +152,9 @@ void notmain(void) {
     // 
     // lock_init(&l); // Initialize the lock.
     // mmu_disable(); // by default MMU is disabled
-    let th1 = pre_fork(task1, 0, 2);
+    let th1 = pre_fork(task1, 0, 2, 0);
     
-    let th2 = pre_fork(task2, 0, 2);
+    let th2 = pre_fork(task2, 0, 2, 0);
     // let th3 = pre_fork(task3, 0, 2);
     pre_run();
 

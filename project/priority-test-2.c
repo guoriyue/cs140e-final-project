@@ -38,8 +38,8 @@ void task2() {
 void notmain(void) {
     pre_init();
 
-    let th1 = pre_fork(task1, 0, 3);
-    let th2 = pre_fork(task2, 0, 3);
+    let th1 = pre_fork(task1, 0, 3, 0);
+    let th2 = pre_fork(task2, 0, 3, 0);
     
     pre_run();
     printk("shared_var = %d\n", shared_var);

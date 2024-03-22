@@ -34,8 +34,8 @@ void notmain(void) {
 
 
     // do the smallest ones first.
-    let th1 = run_single(1, small1, 0, 0xf86a29e);
-    let th2 = run_single(1, small2, 0, 0x4e8e6d76);
+    let th1 = run_single(1, small1, 0, 0x1aa9fb1d);
+    let th2 = run_single(1, small2, 0, 0x48998d87);
     equiv_refresh(th1);
     equiv_refresh(th2);
     // equiv_run();
@@ -43,10 +43,10 @@ void notmain(void) {
     trace("easy no-stack passed\n");
 
     // do a bunch of other ones
-    let th_nop1 = run_single(0, nop_1, 0, 0x72969027);
-    let th_mov_ident = run_single(0, mov_ident, 0, 0x448ce9eb);
-    let th_nop10 = run_single(0, nop_10, 0, 0xb606796e);
-
+    let th_nop1 = run_single(0, nop_1, 0, 0xd26db36f);
+    let th_mov_ident = run_single(0, mov_ident, 0, 0x3d84f05c);
+    let th_nop10 = run_single(0, nop_10, 0, 0x211a53b);
+    // threads cpsr user mode
     // now run all three 
     equiv_refresh(th_nop1);
     equiv_refresh(th_nop10);
