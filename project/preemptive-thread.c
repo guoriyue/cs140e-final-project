@@ -12,12 +12,12 @@ static pre_th_t * volatile cur_thread;
 static pre_th_t *scheduler_thread;
 static regs_t start_regs;
 
-static int equiv = 0;
+static int equiv = 1;
 static unsigned tid = 1;
 static unsigned nalloced = 0;
 
 
-enum { trace_p = 1};
+enum { trace_p = 0};
 #define th_trace(args...) do {                          \
     if(trace_p) {                                       \
         trace(args);                                   \
