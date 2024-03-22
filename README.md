@@ -1,0 +1,126 @@
+Final Project for CS140E
+
+Preemptive Threading
+
+Jiayang Wang & Mingfei Guo
+
+Our project implements a pre-emptive thread library based on 
+timer interrupts. The library supports specification of the priority 
+of each function being executed and a locking mechanism.
+We also validate the correctness of our implementation by comparing
+the hash of the registers of each thread when it exits.
+
+Design:
+
+The following APIs are supported and exposed to user:
+
+For the thread library:
+
+1, pre_init()
+   This initializes the thread library.
+
+2, pre_fork(void (*fn)(void*), void *arg, uint32_t priority, 
+   uint32_t hash)
+   This prepares a function and its arguments for execution by the 
+   thread library. User can also specify the priority of the function 
+   to be scheduled. Once forked, the function stays on the running 
+   queue, awaiting execution.
+
+3, pre_run()
+   This function signals the start of execution of all the functions 
+   already forked into the thread library. 
+
+4, pre_yield()
+   This function yields the current thread, and allows the next 
+   highest priority thread to execute.
+
+5, pre_exit()
+   This function exits the current thread.
+
+For the lock:
+
+1, try_lock()
+   This try to acquire the lock. If the lock is already acquired,
+   it returns 0, otherwise it returns 1.
+
+2, spin_init()
+   This initializes the lock.
+
+3, spin_lock()
+   This acquires the lock. Block until the lock is acquired.
+
+4, spin_unlock()
+   This releases the lock.
+
+The idea is to keep a running queue that stores the states of all unfinished 
+threads. The states are are saved in the form of 17 registers that describe 
+a running thread. They are registers r0-r12, sp, lr, pc, and cpsr. These saved 
+register values, encapsulated as regs_t, effectively serve as a state machine 
+for a thread. When switching from one thread to another, a set of such registers 
+is popped from the queue, and loaded into respective physical registers so that 
+the execution of the thread being switched to is activated. The registers of the 
+current running thread are in turn saved onto the queue. When a thread execution 
+terminates, the next set of registers is popped and loaded, if there still remains any. 
+
+Thread switching is enabled by timer interrupts. Timer parameters are 
+configured during initialization. To enable interrupt in each thread, we 
+set the correponding cpsr when forking each thread. 
+
+To support priority, the running queue is implemented as a priority queue. 
+When popping a set of registers from the queue, the states of the function 
+that has the highest priority value (set during fork) is popped and executed.
+We don't support dynamic priority change, the priority of a thread is
+fixed once it is forked, and we don't need to worry about priority inversion.
+
+Initially we want to implement the lock using the interrupt disable/enable.
+However, we found that the interrupt disable/enable is not enough to protect
+the critical section. We tried to use the atomic swap operation to implement 
+a spin lock. It swaps the value in r1 (which has just been set to 0) with the 
+value at the memory address pointed to by r0 (the lock variable), and stores 
+the old value of the lock variable in r2. It's atomic, ensuring that the load 
+and store happen as a atomic operation, which guarantees the correctness of 
+the lock.
+
+To validate the correctness of our implementation, we compare the hash of
+all breakpoints of each thread when it exits. We register the prefetch abort
+handler function using pre_mini_step_init. Also before and after switching
+between threads, we call mismatch_on and mismatch_off to enable and disable
+breakpoints. This part is almost the same as lab 13.
+
+Tests:
+   preemptive-thread-test-1, preemptive-thread-test-2:
+   Test preemptive. Ignore race condition.
+
+   priority-test-1, priority-test-2:
+   Test priority scheduling (with yield and preemption).
+
+   priority-test-3:
+   Same priority. Test lock.
+
+   equiv-test-1:
+   Check hash of registers at breakpoints. Need to set the equiv variable
+   to 1 to enable the test.
+
+Challenges:
+
+The most significant difference between our pre-emptive thread lib and 
+the cooperative thread lib in the lab is that yielding is now autonomous 
+based on timer interrupts. During an interrupt, the processor mode is 
+switched from user mode to supervisor mode. As such, during context switch, 
+we could no longer simply save only the callee saved registers. 
+Rather, the running queue needs to save all relevant registers so that 
+the state profiles are consistent across mode switching. One bug that 
+confused us was to enable interrupts in each thread so that thread 
+switching works properly. To accomplish that, each CPSR register 
+value of threads need to be set correctly, i.e. the 7-th bit needs to be cleared. 
+
+Another challenge is we always get an "instruction undefined" error when
+we try to switch between threads. We found that the problem is caused by
+incorrect pc value. We need to decrement the pc value by 4 to get the correct
+address of the next instruction in the interrupt handler.
+
+When we try to implement the lock, we found that the interrupt disable/enable
+doesn't work but we are not sure why. Initially we tried ldrex/strex to implement
+the lock, but we found that the ldrex/strex is more complicated than we thought.
+ldrex/strex is more suitable for multi-core system, and it only works on non-cached
+weakly ordered memory. So finally we use swp to implement the lock.
