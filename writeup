@@ -75,6 +75,12 @@ the old value of the lock variable in r2. It's atomic, ensuring that the load
 and store happen as a atomic operation, which guarantees the correctness of 
 the lock.
 
+To validate the correctness of our implementation, we compare the hash of
+all breakpoints of each thread when it exits. We register the prefetch abort
+handler function using pre_mini_step_init. Also before and after switching
+between threads, we call mismatch_on and mismatch_off to enable and disable
+breakpoints. This part is almost the same as lab 13.
+
 Tests:
    preemptive-thread-test-1, preemptive-thread-test-2:
    Test preemptive. Ignore race condition.
@@ -86,7 +92,8 @@ Tests:
    Same priority. Test lock.
 
    equiv-test-1:
-   Check hash of registers when thread exits.
+   Check hash of registers at breakpoints. Need to set the equiv variable
+   to 1 to enable the test.
 
 Challenges:
 
